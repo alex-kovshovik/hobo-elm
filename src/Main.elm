@@ -37,7 +37,7 @@ update action model =
 -- VIEW
 view : Address Action -> Model -> Html
 view address model =
-  div [ class "container clear"] [
+  div [ class "container clear mt1"] [
     div [ class "col-12" ] [
       Expenses.view (Signal.forwardTo address List) model
     ]

@@ -88,6 +88,6 @@ view address model =
   div [ ] [
     viewButtonlist address model,
     viewExpenseForm address model,
-    h2 [ ] [ text "Expenses" ],
+    h3 [ ] [ text "April 2016" ],
     viewExpenseList model
   ]
