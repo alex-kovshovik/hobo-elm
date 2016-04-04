@@ -1,2 +1,3 @@
-# hobo-elm
-HOBO application written in Elm programming language
+# HOBO: Highly Opinionated Budget Organizer
+
+Simple and FAST family budget organizer. Very easy to use, no training necessary.
