@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Signal exposing (Address)
+import Numeral
 
 import Components.BudgetButtonList as BBL
 import Utils.Numbers exposing (onInput, toFloatPoh)
@@ -50,7 +51,7 @@ update action model =
 
 -- VIEW
 expenseText expense =
-  toString expense.amount
+  Numeral.format "$0,0.00" expense.amount
 
 
 expenseItem : Expense -> Html
