@@ -75,7 +75,7 @@ viewExpenseForm address model =
               placeholder "Amount",
               onInput address AmountInput ] [ ]
     ],
-    div [ class "col-3" ] [
+    div [ class "col-2" ] [
       button [ class "button", onClick address Add ] [ text "Add" ]
     ]
   ]

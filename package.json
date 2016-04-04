@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "small and fast family budget organizer'",
   "main": "elm.js",
+  "repository": "https://github.com/aspushkinus/hobo-elm",
   "scripts": {
     "start": "webpack-dev-server --hot --inline --content-base src/",
     "build": "rimraf dist && webpack && cp -r src/img/ dist/img/",
@@ -23,14 +24,19 @@
     "elm-webpack-loader": "2.0.0",
     "extract-text-webpack-plugin": "1.0.1",
     "file-loader": "0.8.5",
+    "font-awesome": "^4.5.0",
+    "font-awesome-webpack": "0.0.4",
     "html-webpack-plugin": "2.9.0",
+    "less": "^2.6.1",
     "node-sass": "3.4.2",
     "postcss-loader": "0.8.1",
     "rimraf": "2.5.2",
     "sass-loader": "3.1.2",
     "style-loader": "0.13.0",
+    "url-loader": "^0.5.7",
     "webpack": "1.12.13",
     "webpack-dev-server": "1.14.1",
     "webpack-merge": "0.7.3"
-  }
+  },
+  "dependencies": {}
 }
