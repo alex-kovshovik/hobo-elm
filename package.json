@@ -1,0 +1,36 @@
+{
+  "name": "hobo",
+  "version": "1.0.0",
+  "description": "small and fast family budget organizer'",
+  "main": "elm.js",
+  "scripts": {
+    "start": "webpack-dev-server --hot --inline --content-base src/",
+    "build": "rimraf dist && webpack && cp -r src/img/ dist/img/",
+    "watch": "webpack --watch"
+  },
+  "keywords": [
+    "budget",
+    "family",
+    "expenses"
+  ],
+  "author": "Alex Kovshovik",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "autoprefixer": "6.3.3",
+    "css-loader": "0.23.1",
+    "elm": "0.16.0",
+    "elm-hot-loader": "0.2.0",
+    "elm-webpack-loader": "2.0.0",
+    "extract-text-webpack-plugin": "1.0.1",
+    "file-loader": "0.8.5",
+    "html-webpack-plugin": "2.9.0",
+    "node-sass": "3.4.2",
+    "postcss-loader": "0.8.1",
+    "rimraf": "2.5.2",
+    "sass-loader": "3.1.2",
+    "style-loader": "0.13.0",
+    "webpack": "1.12.13",
+    "webpack-dev-server": "1.14.1",
+    "webpack-merge": "0.7.3"
+  }
+}

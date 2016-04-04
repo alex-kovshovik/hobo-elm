@@ -1,0 +1,9 @@
+/* Budget buttons */
+button.budget-button {
+  /*background-color: white;*/
+  margin-right: 5px;
+}
+
+button.budget-button.selected {
+  background-color: cyan;
+}
