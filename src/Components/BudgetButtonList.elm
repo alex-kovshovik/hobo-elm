@@ -10,44 +10,33 @@ import Components.BudgetButton as BudgetButton
 
 -- MODEL
 type alias Model = {
-  buttons: List (Int, BudgetButton.Model),
+  buttons: List (Int, String),
   selectedBudget: String
 }
 
-
 -- UPDATE
-type Action
-  = Update Int BudgetButton.Action
+type Action = Toggle Int
 
 
 update : Action -> Model -> Model
 update action model =
   case action of
-    Update id buttonAction ->
+    Toggle id ->
       let
-        updateButton (buttonID, buttonModel) =
-          if buttonID == id
-            then (buttonID, BudgetButton.update buttonAction buttonModel)
-            else (buttonID, { buttonModel | selected = False } )
-
-        foldFunc (buttonID, buttonModel) total =
-          if buttonID == id
-            then total ++ buttonModel.name
-            else total
-
+        getSelectedBudget (buttonID, budgetName) result =
+          if buttonID == id then result ++ budgetName else result
       in
-        { model | buttons = List.map updateButton model.buttons,
-                  selectedBudget = List.foldl foldFunc "" model.buttons }
+        { model | selectedBudget = List.foldl getSelectedBudget "" model.buttons }
 
 
 -- VIEW
-viewBudgetButton: Address Action -> (Int, BudgetButton.Model) -> Html
-viewBudgetButton address (id, buttonModel) =
+viewBudgetButton: Address Action -> Model -> (Int, String) -> Html
+viewBudgetButton address model (id, buttonModel) =
   li [ ] [
-    BudgetButton.view (Signal.forwardTo address (Update id)) buttonModel
+    BudgetButton.view model.selectedBudget (onClick address (Toggle id)) buttonModel
   ]
 
 
 view : Address Action -> Model -> Html
 view address model =
-  ul [ class "list-unstyled list-inline" ] (List.map (viewBudgetButton address) model.buttons)
+  ul [ class "list-unstyled list-inline" ] (List.map (viewBudgetButton address model) model.buttons)

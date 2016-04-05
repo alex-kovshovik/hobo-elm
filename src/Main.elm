@@ -13,11 +13,7 @@ import Components.BudgetButton as BudgetButton
 initialModel : Model
 initialModel =
   let
-    budgetGrocery = BudgetButton.Model "Grocery" False
-    budgetKids = BudgetButton.Model "Kids" False
-    budgetOther = BudgetButton.Model "Other" False
-
-    budgetButtons = [ (1, budgetGrocery), (2, budgetKids), (3, budgetOther) ]
+    budgetButtons = [ (1, "Grocery"), (2, "Kids"), (3, "Other") ]
     buttonList = { buttons = budgetButtons, selectedBudget = "" }
   in
     Model [ ] buttonList 2 ""
