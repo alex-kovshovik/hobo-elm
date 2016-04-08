@@ -4,7 +4,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Signal exposing (Address)
-import Debug
 
 import Components.BudgetButton as BudgetButton
 

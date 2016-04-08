@@ -5,6 +5,10 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Signal exposing (Address)
 import Numeral
+import Task
+import Effects exposing(Effects)
+import Http
+import Json.Decode as Json exposing((:=))
 
 import Components.BudgetButtonList as BBL
 import Utils.Numbers exposing (onInput, toFloatPoh)
@@ -16,8 +20,10 @@ type alias Expense = {
   amount : Float
 }
 
+type alias ExpenseList = List Expense
+
 type alias Model = {
-  expenses : List Expense,
+  expenses : ExpenseList,
   budgets : BBL.Model,
   nextId : Int,
 
@@ -30,23 +36,26 @@ type Action
   = Add
   | AmountInput String
   | BudgetList BBL.Action
+  | Request
+  | DisplayLoaded (Maybe ExpenseList)
 
-update : Action -> Model -> Model
+update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
     Add ->
       let
         newExpense = Expense model.nextId model.budgets.selectedBudget (toFloatPoh model.amount)
       in
-        { model |
+        ({ model |
             expenses = newExpense :: model.expenses,
             nextId = model.nextId + 1,
             amount = ""
-        }
+        }, Effects.none)
 
-    AmountInput amount -> { model | amount = amount }
-
-    BudgetList bblAction -> { model | budgets = BBL.update bblAction model.budgets }
+    AmountInput amount -> ({ model | amount = amount }, Effects.none)
+    BudgetList bblAction -> ({ model | budgets = BBL.update bblAction model.budgets }, Effects.none)
+    Request -> (model, getExpenses)
+    DisplayLoaded expenses -> ({ model | expenses = Maybe.withDefault [] expenses}, Effects.none)
 
 
 -- VIEW
@@ -90,5 +99,27 @@ view address model =
     viewButtonlist address model,
     viewExpenseForm address model,
     h3 [ ] [ text "April 2016" ],
-    viewExpenseList model
+    viewExpenseList model,
+    button [ onClick address Request ] [ text "Load Expenses!" ]
   ]
+
+
+-- Effects
+getExpenses : Effects Action
+getExpenses =
+  Http.get decodeExpenses "http://localhosts:3000/expenses"
+    |> Task.toMaybe
+    |> Task.map DisplayLoaded
+    |> Effects.task
+
+
+decodeExpenses : Json.Decoder ExpenseList
+decodeExpenses =
+  Json.at ["expenses"] (Json.list decodeExpense)
+
+decodeExpense : Json.Decoder Expense
+decodeExpense =
+  Json.object3 Expense
+    ( "id"     := Json.int )
+    ( "budget" := Json.string )
+    ( "amount" := Json.float )
