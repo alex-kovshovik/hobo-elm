@@ -8,7 +8,7 @@ import Signal exposing (Address)
 import Effects exposing (Effects, Never)
 import Task
 
-import Components.Expenses as Expenses exposing (Expense)
+import Components.Expenses as Expenses exposing (Expense, getExpenses)
 import Components.Login as Login
 import Components.BudgetButton as BudgetButton
 
@@ -26,7 +26,7 @@ initialModel =
     data = Expenses.Model [ ] buttonList 2 ""
     user = Login.Model True "74qGtYH8Qa-V1tVMa2uk" "Alex Kovshovik"
   in
-    (Model data user, Effects.none)
+    (Model data user, Effects.map List getExpenses)
 
 
 -- UPDATE
@@ -38,8 +38,14 @@ type Action
 update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
-    List listAction -> ({ model | data = fst (Expenses.update listAction model.data) }, Effects.none)
-    Login loginAction -> (model, Effects.none)
+    List listAction ->
+      let
+        (listData, fx) = Expenses.update listAction model.data
+      in
+        ({ model | data = listData }, Effects.map List fx)
+
+    Login loginAction ->
+      (model, Effects.none)
 
 
 -- VIEW

@@ -1,4 +1,4 @@
-module Components.Expenses (Action, Expense, Model, view, update) where
+module Components.Expenses (Action, Expense, Model, view, update, getExpenses) where
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -9,6 +9,7 @@ import Task
 import Effects exposing(Effects)
 import Http
 import Json.Decode as Json exposing((:=))
+import Debug
 
 import Components.BudgetButtonList as BBL
 import Utils.Numbers exposing (onInput, toFloatPoh)
@@ -37,7 +38,7 @@ type Action
   | AmountInput String
   | BudgetList BBL.Action
   | Request
-  | DisplayLoaded (Maybe ExpenseList)
+  | DisplayLoaded (Result Http.Error ExpenseList)
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
@@ -52,11 +53,28 @@ update action model =
             amount = ""
         }, Effects.none)
 
-    AmountInput amount -> ({ model | amount = amount }, Effects.none)
-    BudgetList bblAction -> ({ model | budgets = BBL.update bblAction model.budgets }, Effects.none)
-    Request -> (model, getExpenses)
-    DisplayLoaded expenses -> ({ model | expenses = Maybe.withDefault [] expenses}, Effects.none)
+    AmountInput amount ->
+      ({ model | amount = amount }, Effects.none)
 
+    BudgetList bblAction ->
+      ({ model | budgets = BBL.update bblAction model.budgets }, Effects.none)
+
+    Request ->
+      (model, getExpenses)
+
+    DisplayLoaded expensesResult ->
+      ({ model | expenses = parseExpenses expensesResult}, Effects.none)
+
+
+parseExpenses : Result Http.Error ExpenseList -> ExpenseList
+parseExpenses expenses =
+  case expenses of
+    Ok list -> list
+    Err error ->
+      let
+        errorMessage = Debug.log "Expense loading/decoding error" error
+      in
+        []
 
 -- VIEW
 expenseText expense =
@@ -107,19 +125,40 @@ view address model =
 -- Effects
 getExpenses : Effects Action
 getExpenses =
-  Http.get decodeExpenses "http://localhosts:3000/expenses"
-    |> Task.toMaybe
+  Http.get decodeExpenses "http://localhost:3000/expenses?user_token=74qGtYH8Qa-V1tVMa2uk&user_email=alex%40shovik.com"
+    |> Task.toResult
     |> Task.map DisplayLoaded
     |> Effects.task
+
+
+-- This is an attempt to send authorization in headers,
+-- but I decided to give up on it until later.
+-- createRequest url =
+--   Http.send Http.defaultSettings {
+--     verb = "GET",
+--     headers = [("X-User-Token", "74qGtYH8Qa-V1tVMa2uk"),
+--                ("X-User-Email", "alex@shovik.com"),
+--                ("Content-Type", "application/json")],
+--     url = url,
+--     body = Http.empty
+--   }
 
 
 decodeExpenses : Json.Decoder ExpenseList
 decodeExpenses =
   Json.at ["expenses"] (Json.list decodeExpense)
 
+
 decodeExpense : Json.Decoder Expense
 decodeExpense =
-  Json.object3 Expense
+  Json.object3 convertDecoding
     ( "id"     := Json.int )
     ( "budget" := Json.string )
-    ( "amount" := Json.float )
+    ( "amount" := Json.string )
+
+
+-- This is only needed to convert amount encoded as String into Float,
+-- But later I'll be converting budget_id into a Budget record.
+convertDecoding : Int -> String -> String -> Expense
+convertDecoding id budget amount =
+  Expense id budget (toFloatPoh amount)
