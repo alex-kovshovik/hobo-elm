@@ -8,6 +8,6 @@ resultToList listResult =
     Ok list -> list
     Err error ->
       let
-        errorMessage = Debug.log "Expense loading/decoding error" error
+        errorMessage = Debug.log "resultToList loading/parsing error" error
       in
         []
