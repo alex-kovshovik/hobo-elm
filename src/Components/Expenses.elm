@@ -9,10 +9,10 @@ import Task
 import Effects exposing(Effects)
 import Http
 import Json.Decode as Json exposing((:=))
-import Debug
 
 import Components.BudgetButtonList as BBL
 import Utils.Numbers exposing (onInput, toFloatPoh)
+import Utils.Parsers exposing (resultToList)
 
 -- MODEL
 type alias Expense = {
@@ -63,18 +63,8 @@ update action model =
       (model, getExpenses)
 
     DisplayLoaded expensesResult ->
-      ({ model | expenses = parseExpenses expensesResult}, Effects.none)
+      ({ model | expenses = resultToList expensesResult}, Effects.none)
 
-
-parseExpenses : Result Http.Error ExpenseList -> ExpenseList
-parseExpenses expenses =
-  case expenses of
-    Ok list -> list
-    Err error ->
-      let
-        errorMessage = Debug.log "Expense loading/decoding error" error
-      in
-        []
 
 -- VIEW
 expenseText expense =
@@ -157,8 +147,17 @@ decodeExpense =
     ( "amount" := Json.string )
 
 
+-- This is the attempt at creating a custom decoder,
+-- to parse that String value into a Float.
+-- TODO: discuss at SF meetup on April 12.
+-- decodeExpenseCustom : Json.Decoder Expense
+-- decodeExpenseCustom =
+--   Json.customDecoder
+
+
 -- This is only needed to convert amount encoded as String into Float,
 -- But later I'll be converting budget_id into a Budget record.
+--
 convertDecoding : Int -> String -> String -> Expense
 convertDecoding id budget amount =
   Expense id budget (toFloatPoh amount)
