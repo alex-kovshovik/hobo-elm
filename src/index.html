@@ -13,64 +13,73 @@
   <link rel="apple-touch-icon" sizes="57x57" href="img/apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="72x72" href="img/apple-touch-icon-72x72.png">
   <link rel="apple-touch-icon" sizes="114x114" href="img/apple-touch-icon-114x114.png">
+
+  <!-- <script src="http://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script> -->
 </head>
 <body>
-  <script>
-    // // This is called with the results from from FB.getLoginStatus().
-    // function statusChangeCallback(response) {
-    //   if (response.status === 'connected') {
-    //     console.log('FB: connected');
-    //     console.log('FB: accessToken: ' + response.authResponse.accessToken);
-    //     console.log('FB: userID: ' + response.authResponse.userID);
-    //     document.getElementById("login").style.display = "none";
-    //     document.getElementById("main").style.display = "block";
-    //   } else if (response.status === 'not_authorized') {
-    //     document.getElementById("login").style.display = "block";
-    //     document.getElementById("login-message").innerHTML = "You're not logged in, please log in with Facebook";
-    //     console.log('FB: not_authorized');
-    //   } else {
-    //     document.getElementById("login").style.display = "block";
-    //     document.getElementById("login-message").innerHTML = "You're not logged in, please log in with Facebook";
-    //     console.log('FB: ' + response.status);
-    //   }
-    // }
-    //
-    // window.fbAsyncInit = function() {
-    //   FB.init({
-    //     appId      : '1752657608283631',
-    //     cookie     : true,  // enable cookies to allow the server to access
-    //                         // the session
-    //     xfbml      : true,  // parse social plugins on this page
-    //     version    : 'v2.5' // use graph api version 2.5
-    //   });
-    //
-    //   FB.getLoginStatus(function(response) {
-    //     statusChangeCallback(response);
-    //   });
-    // };
-    //
-    // // Load the SDK asynchronously
-    // (function(d, s, id) {
-    //   var js, fjs = d.getElementsByTagName(s)[0];
-    //   if (d.getElementById(id)) return;
-    //   js = d.createElement(s); js.id = id;
-    //   js.src = "//connect.facebook.net/en_US/sdk.js";
-    //   fjs.parentNode.insertBefore(js, fjs);
-    // }(document, 'script', 'facebook-jssdk'));
-  </script>
+  <!-- <script>
+    // This is called with the results from from FB.getLoginStatus().
+    function statusChangeCallback(response) {
+      console.log("statusChangeCallback");
+      console.log(response);
 
-  <!-- Application login window -->
-  <!-- <div id="login" class="container clear">
-    <div class="col-12 mt1">
-      <p id="login-message">Logging you in...</p>
+      if (response.status === 'connected') {
+        $.post('http://localhost:3000/auth/register', response, function(data) {
+          console.log("Main feedback");
+          console.log(data);
+        }).done(function() {
+          console.log("Done");
+        }).fail(function(data) {
+          console.log("Fail");
+          console.log(data);
+        });
+      } else if (response.status === 'not_authorized') {
 
-      <fb:login-button scope="public_profile,email">
-      </fb:login-button>
-    </div>
-  </div> -->
+      } else {
 
-  <!-- Main application interface once logged in  -->
-  <div id="main" style="display: block"></div>
+      }
+    }
+
+    // This function is called when someone finishes with the Login
+    // Button.  See the onlogin handler attached to it in the sample
+    // code below.
+    function checkLoginState() {
+      console.log("checkLoginState");
+
+      FB.getLoginStatus(function(response) {
+        statusChangeCallback(response);
+      });
+    }
+
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '1752657608283631',
+        cookie     : true,  // enable cookies to allow the server to access
+                            // the session
+        xfbml      : true,  // parse social plugins on this page
+        version    : 'v2.5' // use graph api version 2.5
+      });
+
+      FB.getLoginStatus(function(response) {
+        console.log("getLoginStatus");
+        statusChangeCallback(response);
+      });
+    };
+
+    // Load the SDK asynchronously
+    (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  </script> -->
+
+  <!-- <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+  </fb:login-button> -->
+
+  <div id="main"></div>
 
   <a class="none block-tablet" href="https://github.com/aspushkinus/hobo-elm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 

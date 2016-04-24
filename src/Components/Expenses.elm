@@ -67,6 +67,7 @@ update action model =
 
 
 -- VIEW
+expenseText : Expense -> String
 expenseText expense =
   Numeral.format "$0,0.00" expense.amount
 
@@ -75,7 +76,7 @@ expenseItem : Expense -> Html
 expenseItem expense =
   li [ ] [ text (expenseText expense), text (" " ++ expense.budget) ]
 
-
+viewExpenseList : Model -> Html
 viewExpenseList model =
   ul [ ] (List.map expenseItem model.expenses)
 
@@ -107,31 +108,17 @@ view address model =
     viewButtonlist address model,
     viewExpenseForm address model,
     h3 [ ] [ text "April 2016" ],
-    viewExpenseList model,
-    button [ onClick address Request ] [ text "Load Expenses!" ]
+    viewExpenseList model
   ]
 
 
--- Effects
+-- EFFECTS
 getExpenses : Effects Action
 getExpenses =
   Http.get decodeExpenses "http://localhost:3000/expenses?user_token=74qGtYH8Qa-V1tVMa2uk&user_email=alex%40shovik.com"
     |> Task.toResult
     |> Task.map DisplayLoaded
     |> Effects.task
-
-
--- This is an attempt to send authorization in headers,
--- but I decided to give up on it until later.
--- createRequest url =
---   Http.send Http.defaultSettings {
---     verb = "GET",
---     headers = [("X-User-Token", "74qGtYH8Qa-V1tVMa2uk"),
---                ("X-User-Email", "alex@shovik.com"),
---                ("Content-Type", "application/json")],
---     url = url,
---     body = Http.empty
---   }
 
 
 decodeExpenses : Json.Decoder ExpenseList
@@ -147,17 +134,6 @@ decodeExpense =
     ( "amount" := Json.string )
 
 
--- This is the attempt at creating a custom decoder,
--- to parse that String value into a Float.
--- TODO: discuss at SF meetup on April 12.
--- decodeExpenseCustom : Json.Decoder Expense
--- decodeExpenseCustom =
---   Json.customDecoder
-
-
--- This is only needed to convert amount encoded as String into Float,
--- But later I'll be converting budget_id into a Budget record.
---
 convertDecoding : Int -> String -> String -> Expense
 convertDecoding id budget amount =
   Expense id budget (toFloatPoh amount)

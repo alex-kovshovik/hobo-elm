@@ -10,7 +10,6 @@ import Task
 
 import Components.Expenses as Expenses exposing (Expense, getExpenses)
 import Components.Login as Login
-import Components.BudgetButton as BudgetButton
 
 -- MODEL
 type alias Model = {
@@ -24,7 +23,7 @@ initialModel =
     budgetButtons = [ (1, "Grocery"), (2, "Kids"), (3, "Other") ]
     buttonList = { buttons = budgetButtons, selectedBudget = "" }
     data = Expenses.Model [ ] buttonList 2 ""
-    user = Login.Model True "74qGtYH8Qa-V1tVMa2uk" "Alex Kovshovik"
+    user = Maybe.withDefault (Login.Model "" "" False) getAuth
   in
     (Model data user, Effects.map List getExpenses)
 
@@ -45,22 +44,33 @@ update action model =
         ({ model | data = listData }, Effects.map List fx)
 
     Login loginAction ->
-      (model, Effects.none)
+      let
+        (userData, fx) = Login.update loginAction model.user
+      in
+        ({ model | user = userData }, Effects.map Login fx)
 
 
 -- VIEW
 view : Address Action -> Model -> Html
 view address model =
-  div [ class "container"] [
-    div [ class "clear col-12 mt1" ] [
-      text ("Welcome " ++ model.user.userName)
-    ],
-    div [ class "clear col-12 mt1" ] [
-      Expenses.view (Signal.forwardTo address List) model.data
+  let
+    currentView =
+      if model.user.authenticated then
+        Expenses.view (Signal.forwardTo address List) model.data
+      else
+        Login.view (Signal.forwardTo address Login) model.user
+  in
+    div [ class "container"] [
+      div [ class "clear col-12 mt1" ] [
+        text ("Welcome " ++ model.user.email)
+      ],
+      div [ class "clear col-12 mt1" ] [
+        currentView
+      ]
     ]
-  ]
 
 -- WIRE STUFF UP
+app : StartApp.App Model
 app =
   StartApp.start {
       init = initialModel,
@@ -73,6 +83,15 @@ main : Signal Html
 main =
   app.html
 
+
+-- PORTS
 port tasks : Signal (Task.Task Never ())
 port tasks =
   app.tasks
+
+
+port getAuth : Maybe Login.Model
+
+port setAuth : Signal Login.Model
+port setAuth =
+  Signal.map .user app.model
