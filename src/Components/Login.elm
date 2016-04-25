@@ -6,13 +6,11 @@ import Html.Events exposing (onClick)
 import Signal exposing (Address)
 import Effects exposing (Effects)
 import Task
-import Debug
 
 import Http
-import Json.Decode as Json exposing((:=))
 
 import Utils.Numbers exposing (onInput)
-import Utils.Parsers exposing (resultOk)
+import Utils.Parsers exposing (httpResultOk)
 
 -- MODEL
 type alias Model = {
@@ -21,15 +19,10 @@ type alias Model = {
   authenticated: Bool
 }
 
-type alias AuthResult = {
-  result: String,
-  message: String
-}
-
 -- UPDATE
 type Action
   = Login
-  | LoginResult (Result Http.Error AuthResult)
+  | LoginResult (Result Http.RawError Http.Response)
   | EmailInput String
   | TokenInput String
 
@@ -41,10 +34,7 @@ update action model =
       (model, checkLogin model)
 
     LoginResult result ->
-      let
-        authenticated = Debug.log "result" (resultOk result)
-      in
-        ({ model | authenticated = authenticated }, Effects.none)
+      ({ model | authenticated = httpResultOk result }, Effects.none)
 
     EmailInput email ->
       ({ model | email = email}, Effects.none)
@@ -93,11 +83,18 @@ view address model =
 -- EFFECTS
 checkLogin : Model -> Effects Action
 checkLogin model =
-  loginData model
-    |> Http.post loginCheckDecoder "http://localhost:3000/auth/check"
+  Http.send Http.defaultSettings (checkLoginRequest model)
     |> Task.toResult
     |> Task.map LoginResult
     |> Effects.task
+
+checkLoginRequest : Model -> Http.Request
+checkLoginRequest model =
+  { verb = "POST",
+    headers = [],
+    url = "http://localhost:3000/auth/check",
+    body = loginData model
+  }
 
 loginData : Model -> Http.Body
 loginData model =
@@ -105,9 +102,3 @@ loginData model =
     Http.stringData "email" model.email,
     Http.stringData "token" model.token
   ]
-
-loginCheckDecoder : Json.Decoder AuthResult
-loginCheckDecoder =
-  Json.object2 AuthResult
-    ( "result"  := Json.string )
-    ( "message" := Json.string )

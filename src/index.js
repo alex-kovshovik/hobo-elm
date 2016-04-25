@@ -3,27 +3,37 @@ require('./styles/base.css')
 require('./styles/hobo.css')
 require('font-awesome-webpack')
 
-// { email: '', token: '', authenticated: false }
-const hoboAuthKey = 'hobo-auth'
-let hoboAuth = null
-
-loadAuth()
-
 const Elm = require('./Main')
-const elmApp = Elm.embed(Elm.Main, document.getElementById('main'), { getAuth: hoboAuth })
 
-function loadAuth () {
-  const storedAuth = window.localStorage.getItem(hoboAuthKey)
-  hoboAuth = storedAuth ? JSON.parse(storedAuth) : null // Global variable is intentional
+const hoboAuthKey = 'hobo-auth'
+
+class HoboJs {
+  constructor () {
+    const elmApp = Elm.embed(Elm.Main, document.getElementById('main'), { getAuth: this.getAuth() })
+
+    this.setupElmPorts(elmApp)
+  }
+
+  getAuth () {
+    const storedAuth = window.localStorage.getItem(hoboAuthKey)
+    return storedAuth ? JSON.parse(storedAuth) : null
+  }
+
+  setAuth (hoboAuth) {
+    const oldAuth = this.getAuth()
+
+    // Only store the authentication if different
+    if (oldAuth === null || oldAuth.authenticated !== hoboAuth.authenticated) {
+      const authJson = JSON.stringify(hoboAuth)
+      window.localStorage.setItem(hoboAuthKey, authJson)
+
+      this.hoboAuth = hoboAuth
+    }
+  }
+
+  setupElmPorts (elmApp, hoboAuth) {
+    elmApp.ports.setAuth.subscribe(auth => this.setAuth(auth))
+  }
 }
 
-elmApp.ports.setAuth.subscribe(function (auth) {
-  // Only store the authentication if different
-  if (hoboAuth.authenticated !== auth.authenticated) {
-    console.log('Storing new hoboAuth: ', auth)
-
-    const authJson = JSON.stringify(auth)
-    window.localStorage.setItem(hoboAuthKey, authJson)
-    hoboAuth = auth
-  }
-})
+const hobo = new HoboJs()

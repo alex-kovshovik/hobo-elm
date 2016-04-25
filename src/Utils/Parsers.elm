@@ -1,5 +1,6 @@
 module Utils.Parsers where
 
+import Http
 import Debug
 
 resultToList : Result a (List b) -> List b
@@ -13,12 +14,16 @@ resultToList listResult =
         []
 
 
-resultOk : Result a b -> Bool
-resultOk result =
-  case result of
-    Ok value -> True -- Ignore the value
+httpResultOk : Result Http.RawError Http.Response -> Bool
+httpResultOk httpResult =
+  case httpResult of
+    Ok httpResponse ->
+      let
+        _ = Debug.log "httpResultOk response" httpResponse
+      in
+        if httpResponse.status == 200 then True else False
     Err error ->
       let
-        errorMessage = Debug.log "resultOk loading/parsing error" error
+        errorMessage = Debug.log "httpResultOk loading/parsing error" error
       in
         False
