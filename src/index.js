@@ -62,6 +62,8 @@ class HoboJs {
   }
 
   handleFacebookResponse (fbResponse) {
+    fbResponse.facebookAccessToken = this.facebookAccessToken // Mutation, but fuck it, my main app is in Elm LOL!
+
     $.post('http://localhost:3000/auth/register', fbResponse, this.handleRegisterResponse.bind(this)).fail(function (data) {
       alert('Error registering user account')
     })
@@ -81,6 +83,8 @@ class HoboJs {
 
   statusChangeCallback (response) {
     if (response.status === 'connected') {
+      this.facebookAccessToken = response.authResponse.accessToken // Another mutation and also fuck it - see above LOL!
+
       FB.api('/me?fields=name,email', this.handleFacebookResponse.bind(this))
     } else if (response.status === 'not_authorized') {
       alert('Facebook login is not authorized')
