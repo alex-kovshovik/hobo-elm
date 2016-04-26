@@ -92,6 +92,7 @@ port tasks =
 
 port getAuth : Maybe Login.Model
 
+
 port setAuth : Signal Login.Model
 port setAuth =
   Signal.map .user app.model

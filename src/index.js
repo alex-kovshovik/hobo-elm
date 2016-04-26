@@ -9,9 +9,14 @@ const hoboAuthKey = 'hobo-auth'
 
 class HoboJs {
   constructor () {
-    const elmApp = Elm.embed(Elm.Main, document.getElementById('main'), { getAuth: this.getAuth() })
+    const hoboAuth = this.getAuth()
+    if (hoboAuth === null || !hoboAuth.authenticated) {
+      this.showFacebookLogin()
+    }
 
-    this.setupElmPorts(elmApp)
+    this.elmApp = Elm.embed(Elm.Main, document.getElementById('main'), { getAuth: hoboAuth })
+
+    this.setupElmPorts(this.elmApp)
   }
 
   getAuth () {
@@ -34,6 +39,64 @@ class HoboJs {
   setupElmPorts (elmApp, hoboAuth) {
     elmApp.ports.setAuth.subscribe(auth => this.setAuth(auth))
   }
+
+  showFacebookLogin () {
+    document.getElementById('main').style.display = 'none'
+    document.getElementById('fblogin').style.display = 'block';
+
+    (function (d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0]
+      if (d.getElementById(id)) return
+      js = d.createElement(s); js.id = id
+      js.src = '//connect.facebook.net/en_US/sdk.js'
+      fjs.parentNode.insertBefore(js, fjs)
+    }(document, 'script', 'facebook-jssdk'))
+  }
+
+  handleFacebookResponse (fbResponse) {
+    $.post('http://localhost:3000/auth/register', fbResponse, this.handleRegisterResponse.bind(this)).fail(function (data) {
+      alert('Error registering user account')
+    })
+  }
+
+  handleRegisterResponse (authData) {
+    const auth = this.getAuth()
+
+    auth.email = authData.email
+    auth.token = authData.token
+    auth.authenticated = true
+    this.setAuth(auth)
+
+    window.location.reload()
+    // this.elmApp.ports.getAuth.send({})
+  }
+
+  statusChangeCallback (response) {
+    if (response.status === 'connected') {
+      FB.api('/me?fields=name,email', this.handleFacebookResponse.bind(this))
+    } else if (response.status === 'not_authorized') {
+      alert('Facebook login is not authorized')
+    } else {
+      alert('Unknown Facebook login status')
+    }
+  }
 }
 
-const hobo = new HoboJs()
+window.hobo = new HoboJs()
+
+// This function is called when someone finishes with the Login
+// Button.  See the onlogin handler attached to it in the sample
+// code below.
+window.checkLoginState = function () {
+  FB.getLoginStatus(window.hobo.statusChangeCallback.bind(window.hobo))
+}
+
+window.fbAsyncInit = function () {
+  FB.init({
+    appId: '1752657608283631',
+    cookie: true,  // enable cookies to allow the server to access
+                        // the session
+    xfbml: true,  // parse social plugins on this page
+    version: 'v2.5' // use graph api version 2.5
+  })
+}
