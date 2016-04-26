@@ -14,7 +14,7 @@ import Components.Login as Login
 -- MODEL
 type alias Model = {
   data: Expenses.Model,
-  user: Login.Model
+  user: Login.User
 }
 
 initialModel : (Model, Effects Action)
@@ -23,15 +23,15 @@ initialModel =
     budgetButtons = [ (1, "Grocery"), (2, "Kids"), (3, "Other") ]
     buttonList = { buttons = budgetButtons, selectedBudget = "" }
     data = Expenses.Model [ ] buttonList 2 ""
-    user = Maybe.withDefault (Login.Model "" "" False) getAuth
+    user = Login.User "" "" False
   in
-    (Model data user, Effects.map List getExpenses)
+    (Model data user, Effects.none)
 
 
 -- UPDATE
 type Action
   = List Expenses.Action
-  | Login Login.Action
+  | Login Login.User
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -43,31 +43,26 @@ update action model =
       in
         ({ model | data = listData }, Effects.map List fx)
 
-    Login loginAction ->
+    Login user ->
       let
-        (userData, fx) = Login.update loginAction model.user
+        fx = if user.authenticated
+               then Effects.map List getExpenses
+               else Effects.none
       in
-        ({ model | user = userData }, Effects.map Login fx)
+        ({ model | user = user }, fx)
 
 
 -- VIEW
 view : Address Action -> Model -> Html
 view address model =
-  let
-    currentView =
-      if model.user.authenticated then
-        Expenses.view (Signal.forwardTo address List) model.data
-      else
-        Login.view (Signal.forwardTo address Login) model.user
-  in
-    div [ class "container"] [
-      div [ class "clear col-12 mt1" ] [
-        text ("Welcome " ++ model.user.email)
-      ],
-      div [ class "clear col-12 mt1" ] [
-        currentView
-      ]
+  div [ class "container"] [
+    div [ class "clear col-12 mt1" ] [
+      text ("Welcome " ++ model.user.email)
+    ],
+    div [ class "clear col-12 mt1" ] [
+      Expenses.view (Signal.forwardTo address List) model.data
     ]
+  ]
 
 -- WIRE STUFF UP
 app : StartApp.App Model
@@ -76,12 +71,18 @@ app =
       init = initialModel,
       update = update,
       view = view,
-      inputs = []
+      inputs = [ loginActions ]
     }
 
 main : Signal Html
 main =
   app.html
+
+
+-- SIGNALS
+loginActions : Signal Action
+loginActions =
+  Signal.map Login loginSuccess
 
 
 -- PORTS
@@ -90,9 +91,4 @@ port tasks =
   app.tasks
 
 
-port getAuth : Maybe Login.Model
-
-
-port setAuth : Signal Login.Model
-port setAuth =
-  Signal.map .user app.model
+port loginSuccess : Signal Login.User

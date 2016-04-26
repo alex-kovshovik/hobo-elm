@@ -9,35 +9,34 @@ const hoboAuthKey = 'hobo-auth'
 
 class HoboJs {
   constructor () {
-    const hoboAuth = this.getAuth()
-    if (hoboAuth === null || !hoboAuth.authenticated) {
+    let hoboAuth = this.getAuth()
+
+    if (!hoboAuth.authenticated) {
       this.showFacebookLogin()
     }
 
-    this.elmApp = Elm.embed(Elm.Main, document.getElementById('main'), { getAuth: hoboAuth })
-
-    this.setupElmPorts(this.elmApp)
+    this.elmApp = Elm.embed(Elm.Main, document.getElementById('main'), { loginSuccess: hoboAuth })
   }
 
   getAuth () {
     const storedAuth = window.localStorage.getItem(hoboAuthKey)
-    return storedAuth ? JSON.parse(storedAuth) : null
+    return storedAuth ? JSON.parse(storedAuth) : this.getDefaultAuth()
+  }
+
+  getDefaultAuth () {
+    return { email: '', token: '', authenticated: false }
   }
 
   setAuth (hoboAuth) {
     const oldAuth = this.getAuth()
 
     // Only store the authentication if different
-    if (oldAuth === null || oldAuth.authenticated !== hoboAuth.authenticated) {
+    if (oldAuth.authenticated !== hoboAuth.authenticated) {
       const authJson = JSON.stringify(hoboAuth)
       window.localStorage.setItem(hoboAuthKey, authJson)
 
       this.hoboAuth = hoboAuth
     }
-  }
-
-  setupElmPorts (elmApp, hoboAuth) {
-    elmApp.ports.setAuth.subscribe(auth => this.setAuth(auth))
   }
 
   showFacebookLogin () {
@@ -51,6 +50,11 @@ class HoboJs {
       js.src = '//connect.facebook.net/en_US/sdk.js'
       fjs.parentNode.insertBefore(js, fjs)
     }(document, 'script', 'facebook-jssdk'))
+  }
+
+  hideFacebookLogin () {
+    document.getElementById('main').style.display = 'block'
+    document.getElementById('fblogin').style.display = 'none';
   }
 
   handleFacebookResponse (fbResponse) {
@@ -67,8 +71,8 @@ class HoboJs {
     auth.authenticated = true
     this.setAuth(auth)
 
-    window.location.reload()
-    // this.elmApp.ports.getAuth.send({})
+    this.elmApp.ports.loginSuccess.send(auth)
+    this.hideFacebookLogin()
   }
 
   statusChangeCallback (response) {
