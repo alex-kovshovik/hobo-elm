@@ -27,6 +27,11 @@ initialModel =
   in
     (Model data user, Effects.none)
 
+loadListEffect : Login.User -> Effects Action
+loadListEffect user =
+  if user.authenticated
+    then Effects.map List getExpenses
+    else Effects.none
 
 -- UPDATE
 type Action
@@ -44,12 +49,7 @@ update action model =
         ({ model | data = listData }, Effects.map List fx)
 
     Login user ->
-      let
-        fx = if user.authenticated
-               then Effects.map List getExpenses
-               else Effects.none
-      in
-        ({ model | user = user }, fx)
+      ({ model | user = user }, loadListEffect user)
 
 
 -- VIEW

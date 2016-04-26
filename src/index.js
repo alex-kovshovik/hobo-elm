@@ -16,6 +16,10 @@ class HoboJs {
     }
 
     this.elmApp = Elm.embed(Elm.Main, document.getElementById('main'), { loginSuccess: hoboAuth })
+
+    if (hoboAuth.authenticated) {
+      this.elmApp.ports.loginSuccess.send(hoboAuth)
+    }
   }
 
   getAuth () {
