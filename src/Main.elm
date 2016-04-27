@@ -8,7 +8,8 @@ import Signal exposing (Address)
 import Effects exposing (Effects, Never)
 import Task
 
-import Components.Expenses as Expenses exposing (Expense, getExpenses)
+import Records exposing (Budget, Expense, RecordId)
+import Components.Expenses as Expenses exposing (getExpenses)
 import Components.Login as Login
 
 -- MODEL
@@ -20,9 +21,9 @@ type alias Model = {
 initialModel : (Model, Effects Action)
 initialModel =
   let
-    budgetButtons = [ (1, "Grocery"), (2, "Kids"), (3, "Other") ]
-    buttonList = { buttons = budgetButtons, selectedBudget = "" }
-    data = Expenses.Model [ ] buttonList 2 ""
+    budgets = [ (Budget 1 "Grocery"), (Budget 2 "Kids"), (Budget 3 "Other") ]
+    buttonList = { budgets = budgets, currentBudget = Nothing }
+    data = Expenses.Model buttonList [] 2 ""
     user = Login.User "" "" False
   in
     (Model data user, Effects.none)

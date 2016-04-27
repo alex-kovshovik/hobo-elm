@@ -2,18 +2,20 @@ module Components.BudgetButton where
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
-import Signal exposing (Address)
 import String
 
+import Records exposing (Budget)
+
 -- VIEW
-buttonClass : String -> String -> Attribute
-buttonClass selectedBudget model =
+buttonClass : Maybe Budget -> Budget -> Attribute
+buttonClass currentBudget budget =
   let
     baseClasses = [ "button", "budget-button" ]
-    classes = if selectedBudget == model then "selected" :: baseClasses else baseClasses
+    classes = if currentBudget == Just budget then "selected" :: baseClasses else baseClasses
   in
     class (String.join " " classes)
 
-view selectedBudget clicker model =
-  button [ buttonClass selectedBudget model, clicker ] [ text model ]
+
+view : Maybe Budget -> Attribute -> Budget -> Html
+view currentBudget clicker budget =
+  button [ buttonClass currentBudget budget, clicker ] [ text budget.name ]

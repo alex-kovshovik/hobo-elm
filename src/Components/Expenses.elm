@@ -1,4 +1,4 @@
-module Components.Expenses (Action, Expense, Model, view, update, getExpenses) where
+module Components.Expenses where
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -10,23 +10,16 @@ import Effects exposing(Effects)
 import Http
 import Json.Decode as Json exposing((:=))
 
+import Records exposing (Expense, Budget, RecordId)
 import Components.BudgetButtonList as BBL
 import Utils.Numbers exposing (onInput, toFloatPoh)
 import Utils.Parsers exposing (resultToList)
 
 -- MODEL
-type alias Expense = {
-  id : Int,
-  budget: String,
-  amount : Float
-}
-
-type alias ExpenseList = List Expense
-
 type alias Model = {
-  expenses : ExpenseList,
-  budgets : BBL.Model,
-  nextId : Int,
+  buttons : BBL.Model,
+  expenses : List Expense,
+  nextExpenseId : Int,
 
   -- form
   amount : String
@@ -38,18 +31,19 @@ type Action
   | AmountInput String
   | BudgetList BBL.Action
   | Request
-  | DisplayLoaded (Result Http.Error ExpenseList)
+  | DisplayLoaded (Result Http.Error (List Expense))
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
     Add ->
       let
-        newExpense = Expense model.nextId model.budgets.selectedBudget (toFloatPoh model.amount)
+        budget = Maybe.withDefault (Budget 0 "Undefined") model.buttons.currentBudget
+        newExpense = Expense model.nextExpenseId budget (toFloatPoh model.amount) ""
       in
         ({ model |
             expenses = newExpense :: model.expenses,
-            nextId = model.nextId + 1,
+            nextExpenseId = model.nextExpenseId + 1,
             amount = ""
         }, Effects.none)
 
@@ -57,7 +51,7 @@ update action model =
       ({ model | amount = amount }, Effects.none)
 
     BudgetList bblAction ->
-      ({ model | budgets = BBL.update bblAction model.budgets }, Effects.none)
+      ({ model | buttons = BBL.update bblAction model.buttons }, Effects.none)
 
     Request ->
       (model, getExpenses)
@@ -74,7 +68,7 @@ expenseText expense =
 
 expenseItem : Expense -> Html
 expenseItem expense =
-  li [ ] [ text (expenseText expense), text (" " ++ expense.budget) ]
+  li [ ] [ text (expenseText expense), text (" " ++ expense.budget.name) ]
 
 viewExpenseList : Model -> Html
 viewExpenseList model =
@@ -100,7 +94,7 @@ viewExpenseForm address model =
 
 viewButtonlist : Address Action -> Model -> Html
 viewButtonlist address model =
-  BBL.view (Signal.forwardTo address BudgetList) model.budgets
+  BBL.view (Signal.forwardTo address BudgetList) model.buttons
 
 view : Address Action -> Model -> Html
 view address model =
@@ -121,19 +115,23 @@ getExpenses =
     |> Effects.task
 
 
-decodeExpenses : Json.Decoder ExpenseList
+decodeExpenses : Json.Decoder (List Expense)
 decodeExpenses =
   Json.at ["expenses"] (Json.list decodeExpense)
 
 
 decodeExpense : Json.Decoder Expense
 decodeExpense =
-  Json.object3 convertDecoding
-    ( "id"     := Json.int )
-    ( "budget" := Json.string )
-    ( "amount" := Json.string )
+  Json.object4 convertDecoding
+    ( "id"        := Json.int )
+    ( "budget_id" := Json.int )
+    ( "amount"    := Json.string )
+    ( "comment"   := Json.string )
 
 
-convertDecoding : Int -> String -> String -> Expense
-convertDecoding id budget amount =
-  Expense id budget (toFloatPoh amount)
+convertDecoding : RecordId -> RecordId -> String -> String -> Expense
+convertDecoding id budgetId amount comment =
+  let
+    budget = Budget 0 "Undefined"
+  in
+    Expense id budget (toFloatPoh amount) comment
