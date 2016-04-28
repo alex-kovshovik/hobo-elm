@@ -20,6 +20,14 @@ body {
 }
 
 /**
+ * Form
+ */
+button:disabled {
+  color: lightgray
+}
+
+
+/**
  * Footer Styles
  */
 
@@ -37,7 +45,10 @@ body {
   margin-top: 24px;
 }
 
-/* Budget buttons */
+/**
+ * Budget buttons
+ */
+
 button.budget-button {
   /*background-color: white;*/
   margin-right: 5px;

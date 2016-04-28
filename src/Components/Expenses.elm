@@ -68,11 +68,19 @@ expenseText expense =
 
 expenseItem : Expense -> Html
 expenseItem expense =
-  li [ ] [ text (expenseText expense), text (" " ++ expense.budget.name) ]
+  tr [ ] [
+    td [ ] [ text (expense.budget.name) ],
+    td [ ] [ text (expenseText expense) ]
+  ]
 
 viewExpenseList : Model -> Html
 viewExpenseList model =
-  ul [ ] (List.map expenseItem model.expenses)
+  let
+    lambda expense =
+      Just expense.budget == model.buttons.currentBudget || model.buttons.currentBudget == Nothing
+    expenses = List.filter lambda model.expenses
+  in
+    table [ ] (List.map expenseItem expenses)
 
 
 viewExpenseForm : Address Action -> Model -> Html
@@ -88,7 +96,7 @@ viewExpenseForm address model =
               onInput address AmountInput ] [ ]
     ],
     div [ class "col-2" ] [
-      button [ class "button", onClick address Add ] [ text "Add" ]
+      button [ class "button", onClick address Add, disabled (model.buttons.currentBudget == Nothing || model.amount == "") ] [ text "Add" ]
     ]
   ]
 
