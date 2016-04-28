@@ -8,36 +8,45 @@ import Signal exposing (Address)
 import Effects exposing (Effects, Never)
 import Task
 
-import Records exposing (Budget, Expense, RecordId)
 import Components.Expenses as Expenses exposing (getExpenses)
-import Components.Login as Login
+import Components.BudgetButtonList exposing (getBudgets)
+import Components.Login exposing (User)
 
 -- MODEL
 type alias Model = {
   data: Expenses.Model,
-  user: Login.User
+  user: User
 }
 
 initialModel : (Model, Effects Action)
 initialModel =
   let
-    budgets = [ (Budget 1 "Grocery"), (Budget 2 "Kids"), (Budget 3 "Other") ]
-    buttonList = { budgets = budgets, currentBudget = Nothing }
-    data = Expenses.Model buttonList [] 2 ""
-    user = Login.User "" "" False
+    data = Expenses.initialModel
+    user = User "" "" False
   in
     (Model data user, Effects.none)
 
-loadListEffect : Login.User -> Effects Action
-loadListEffect user =
+initialLoadEffects : User -> Effects Action
+initialLoadEffects user =
   if user.authenticated
-    then Effects.map List getExpenses
+    then Effects.batch [ loadExpensesEffect user, loadBudgetsEffect user ]
     else Effects.none
+
+
+loadExpensesEffect : User -> Effects Action
+loadExpensesEffect user =
+  getExpenses user |> Effects.map List
+
+
+loadBudgetsEffect : User -> Effects Action
+loadBudgetsEffect user =
+  getBudgets user |> Effects.map Expenses.BudgetList |> Effects.map List
+
 
 -- UPDATE
 type Action
   = List Expenses.Action
-  | Login Login.User
+  | Login User
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -45,12 +54,12 @@ update action model =
   case action of
     List listAction ->
       let
-        (listData, fx) = Expenses.update listAction model.data
+        (listData, fx) = Expenses.update model.user listAction model.data
       in
         ({ model | data = listData }, Effects.map List fx)
 
     Login user ->
-      ({ model | user = user }, loadListEffect user)
+      ({ model | user = user }, initialLoadEffects user)
 
 
 -- VIEW
@@ -92,4 +101,4 @@ port tasks =
   app.tasks
 
 
-port loginSuccess : Signal Login.User
+port loginSuccess : Signal User

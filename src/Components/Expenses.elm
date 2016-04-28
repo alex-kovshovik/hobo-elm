@@ -6,12 +6,13 @@ import Html.Events exposing (onClick)
 import Signal exposing (Address)
 import Numeral
 import Task
-import Effects exposing(Effects)
+import Effects exposing (Effects)
 import Http
 import Json.Decode as Json exposing((:=))
 
 import Records exposing (Expense, Budget, RecordId)
 import Components.BudgetButtonList as BBL
+import Components.Login exposing (User)
 import Utils.Numbers exposing (onInput, toFloatPoh)
 import Utils.Parsers exposing (resultToList)
 
@@ -25,6 +26,10 @@ type alias Model = {
   amount : String
 }
 
+initialModel : Model
+initialModel =
+  Model BBL.initialModel [] 2 ""
+
 -- UPDATE
 type Action
   = Add
@@ -33,8 +38,8 @@ type Action
   | Request
   | DisplayLoaded (Result Http.Error (List Expense))
 
-update : Action -> Model -> (Model, Effects Action)
-update action model =
+update : User -> Action -> Model -> (Model, Effects Action)
+update user action model =
   case action of
     Add ->
       let
@@ -51,10 +56,13 @@ update action model =
       ({ model | amount = amount }, Effects.none)
 
     BudgetList bblAction ->
-      ({ model | buttons = BBL.update bblAction model.buttons }, Effects.none)
+      let
+        (buttonData, fx) = BBL.update user bblAction model.buttons
+      in
+        ({ model | buttons = buttonData }, Effects.map BudgetList fx)
 
     Request ->
-      (model, getExpenses)
+      (model, getExpenses user)
 
     DisplayLoaded expensesResult ->
       ({ model | expenses = resultToList expensesResult}, Effects.none)
@@ -109,18 +117,25 @@ view address model =
   div [ ] [
     viewButtonlist address model,
     viewExpenseForm address model,
-    h3 [ ] [ text "April 2016" ],
+    h3 [ ] [ text "This week" ],
     viewExpenseList model
   ]
 
 
 -- EFFECTS
-getExpenses : Effects Action
-getExpenses =
-  Http.get decodeExpenses "http://localhost:3000/expenses?user_token=74qGtYH8Qa-V1tVMa2uk&user_email=alex%40shovik.com"
+getExpenses : User -> Effects Action
+getExpenses user =
+  Http.get decodeExpenses (expensesUrl user)
     |> Task.toResult
     |> Task.map DisplayLoaded
     |> Effects.task
+
+
+expensesUrl : User -> String
+expensesUrl user =
+  Http.url "http://localhost:3000/expenses"
+    [ ("user_token", user.token),
+      ("user_email", user.email) ]
 
 
 decodeExpenses : Json.Decoder (List Expense)
@@ -130,16 +145,15 @@ decodeExpenses =
 
 decodeExpense : Json.Decoder Expense
 decodeExpense =
-  Json.object4 convertDecoding
+  Json.object3 convertDecoding
     ( "id"        := Json.int )
     ( "budget_id" := Json.int )
     ( "amount"    := Json.string )
-    ( "comment"   := Json.string )
 
 
-convertDecoding : RecordId -> RecordId -> String -> String -> Expense
-convertDecoding id budgetId amount comment =
+convertDecoding : RecordId -> RecordId -> String -> Expense
+convertDecoding id budgetId amount =
   let
     budget = Budget 0 "Undefined"
   in
-    Expense id budget (toFloatPoh amount) comment
+    Expense id budget (toFloatPoh amount) ""
