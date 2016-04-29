@@ -1,5 +1,7 @@
 module Records where
 
+import Date exposing(Date)
+
 type alias RecordId = Int
 
 type alias Budget = {
@@ -12,5 +14,6 @@ type alias Expense = {
   budgetId: RecordId,
   budgetName: String,
   amount : Float,
-  comment : String
+  comment : String,
+  createdAt : Date
 }

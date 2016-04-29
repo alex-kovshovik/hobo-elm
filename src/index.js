@@ -85,7 +85,7 @@ class HoboJs {
     if (response.status === 'connected') {
       this.facebookAccessToken = response.authResponse.accessToken // Another mutation and also fuck it - see above LOL!
 
-      FB.api('/me?fields=name,email', this.handleFacebookResponse.bind(this))
+      FB.api('/me?fields=name,email,timezone', this.handleFacebookResponse.bind(this))
     } else if (response.status === 'not_authorized') {
       alert('Facebook login is not authorized')
     } else {
