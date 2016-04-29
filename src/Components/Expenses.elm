@@ -43,8 +43,8 @@ update user action model =
   case action of
     Add ->
       let
-        budget = Maybe.withDefault (Budget 0 "Undefined") model.buttons.currentBudget
-        newExpense = Expense model.nextExpenseId budget (toFloatPoh model.amount) ""
+        budgetId = Maybe.withDefault -1 model.buttons.currentBudgetId
+        newExpense = Expense model.nextExpenseId budgetId "this is going to be replaced with AJAX load" (toFloatPoh model.amount) ""
       in
         ({ model |
             expenses = newExpense :: model.expenses,
@@ -77,16 +77,16 @@ expenseText expense =
 expenseItem : Expense -> Html
 expenseItem expense =
   tr [ ] [
-    td [ ] [ text (expense.budget.name) ],
+    td [ ] [ text (expense.budgetName) ],
     td [ ] [ text (expenseText expense) ]
   ]
 
 viewExpenseList : Model -> Html
 viewExpenseList model =
   let
-    lambda expense =
-      Just expense.budget == model.buttons.currentBudget || model.buttons.currentBudget == Nothing
-    expenses = List.filter lambda model.expenses
+    filter expense =
+      Just expense.budgetId == model.buttons.currentBudgetId || model.buttons.currentBudgetId == Nothing
+    expenses = List.filter filter model.expenses
   in
     table [ ] (List.map expenseItem expenses)
 
@@ -104,7 +104,7 @@ viewExpenseForm address model =
               onInput address AmountInput ] [ ]
     ],
     div [ class "col-2" ] [
-      button [ class "button", onClick address Add, disabled (model.buttons.currentBudget == Nothing || model.amount == "") ] [ text "Add" ]
+      button [ class "button", onClick address Add, disabled (model.buttons.currentBudgetId == Nothing || model.amount == "") ] [ text "Add" ]
     ]
   ]
 
@@ -145,15 +145,13 @@ decodeExpenses =
 
 decodeExpense : Json.Decoder Expense
 decodeExpense =
-  Json.object3 convertDecoding
-    ( "id"        := Json.int )
-    ( "budget_id" := Json.int )
-    ( "amount"    := Json.string )
+  Json.object4 convertDecoding
+    ( "id"          := Json.int )
+    ( "budget_id"   := Json.int )
+    ( "budget_name" := Json.string )
+    ( "amount"      := Json.string )
 
 
-convertDecoding : RecordId -> RecordId -> String -> Expense
-convertDecoding id budgetId amount =
-  let
-    budget = Budget 0 "Undefined"
-  in
-    Expense id budget (toFloatPoh amount) ""
+convertDecoding : RecordId -> RecordId -> String -> String -> Expense
+convertDecoding id budgetId budgetName amount =
+    Expense id budgetId budgetName (toFloatPoh amount) ""

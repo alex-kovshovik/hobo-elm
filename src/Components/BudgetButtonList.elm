@@ -18,7 +18,7 @@ import Utils.Parsers exposing (resultToList)
 -- MODEL
 type alias Model = {
   budgets : List Budget,
-  currentBudget : Maybe Budget -- one or none can be selected.
+  currentBudgetId : Maybe RecordId -- one or none can be selected.
 }
 
 initialModel : Model
@@ -38,14 +38,11 @@ update user action model =
   case action of
     Toggle id ->
       let
-        clickedBudgets = List.filter (\budget -> budget.id == id) model.budgets
-        clickedBudget = List.head clickedBudgets
-
-        currentBudget = if model.currentBudget == clickedBudget
-                          then Nothing
-                          else clickedBudget
+        currentBudgetId = if Just id == model.currentBudgetId
+                            then Nothing
+                            else Just id
       in
-        ({ model | currentBudget = currentBudget }, Effects.none)
+        ({ model | currentBudgetId = currentBudgetId }, Effects.none)
 
     Request ->
       (model, getBudgets user)
@@ -58,7 +55,7 @@ update user action model =
 viewBudgetButton: Address Action -> Model -> Budget -> Html
 viewBudgetButton address model budget =
   li [ ] [
-    BudgetButton.view model.currentBudget (onClick address (Toggle budget.id)) budget
+    BudgetButton.view model.currentBudgetId (onClick address (Toggle budget.id)) budget
   ]
 
 

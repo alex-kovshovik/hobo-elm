@@ -9,7 +9,8 @@ type alias Budget = {
 
 type alias Expense = {
   id : RecordId,
-  budget: Budget,
+  budgetId: RecordId,
+  budgetName: String,
   amount : Float,
   comment : String
 }

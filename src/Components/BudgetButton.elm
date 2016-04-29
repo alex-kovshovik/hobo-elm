@@ -4,18 +4,18 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import String
 
-import Records exposing (Budget)
+import Records exposing (Budget, RecordId)
 
 -- VIEW
-buttonClass : Maybe Budget -> Budget -> Attribute
-buttonClass currentBudget budget =
+buttonClass : Maybe RecordId -> Budget -> Attribute
+buttonClass currentBudgetId budget =
   let
     baseClasses = [ "button", "budget-button" ]
-    classes = if currentBudget == Just budget then "selected" :: baseClasses else baseClasses
+    classes = if currentBudgetId == Just budget.id then "selected" :: baseClasses else baseClasses
   in
     class (String.join " " classes)
 
 
-view : Maybe Budget -> Attribute -> Budget -> Html
-view currentBudget clicker budget =
-  button [ buttonClass currentBudget budget, clicker ] [ text budget.name ]
+view : Maybe RecordId -> Attribute -> Budget -> Html
+view currentBudgetId clicker budget =
+  button [ buttonClass currentBudgetId budget, clicker ] [ text budget.name ]
