@@ -57,3 +57,7 @@ button.budget-button {
 button.budget-button.selected {
   background-color: cyan;
 }
+
+button.delete {
+  background-color: red;
+}

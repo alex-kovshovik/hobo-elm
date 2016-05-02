@@ -41,8 +41,9 @@ type Action
   = AmountInput String
   | BudgetList BBL.Action
 
-  -- adding new expense
+  -- adding/removing expenses
   | RequestAdd
+  | RequestRemove Expense
   | UpdateAdded (Result (Error Expense) (Response Expense))
 
   -- loading and displaying the list
@@ -61,13 +62,19 @@ update user action model =
       in
         ({ model | buttons = buttonData }, Effects.map BudgetList fx)
 
-    -- adding new expense
+    -- adding/removing expenses
     RequestAdd ->
       let
         budgetId = Maybe.withDefault -1 model.buttons.currentBudgetId
         newExpense = Expense 0 budgetId "" (toFloatPoh model.amount) "" (Date.fromTime 0)
       in
         ({ model | amount = "" }, addExpense user newExpense)
+
+    RequestRemove expense ->
+      let
+        newExpenses = List.filter (\ex -> ex.id /= expense.id) model.expenses
+      in
+        ({ model | expenses = newExpenses}, Effects.none)
 
     UpdateAdded expenseResult ->
       let
@@ -93,16 +100,18 @@ formatAmount amount =
   Numeral.format "$0,0.00" amount
 
 
-expenseItem : Expense -> Html
-expenseItem expense =
+expenseItem : Address Action -> Expense -> Html
+expenseItem address expense =
   tr [ ] [
     td [ ] [ text (format "%b %d" expense.createdAt) ],
     td [ ] [ text expense.budgetName ],
-    td [ ] [ text (formatAmount expense.amount) ]
+    td [ class "text-right" ] [ text (formatAmount expense.amount) ],
+    td [ ] [ text "X" ]
+    -- td [ ] [ button [ class "delete", onClick address (RequestRemove expense) ] [ text "X" ] ]
   ]
 
-viewExpenseList : Model -> Html
-viewExpenseList model =
+viewExpenseList : Address Action -> Model -> Html
+viewExpenseList address model =
   let
     filter expense =
       Just expense.budgetId == model.buttons.currentBudgetId || model.buttons.currentBudgetId == Nothing
@@ -110,12 +119,13 @@ viewExpenseList model =
     total = List.foldl (\ex sum -> sum + ex.amount) 0.0 expenses
   in
     table [ ] [
-      tbody [ ] (List.map expenseItem expenses),
+      tbody [ ] (List.map (expenseItem address) expenses),
       tfoot [ ] [
         tr [ ] [
           th [ ] [ text "" ],
           th [ ] [ text "Total:" ],
-          th [ ] [ text (formatAmount total) ]
+          th [ class "text-right" ] [ text (formatAmount total) ],
+          th [ ] [ text "" ]
         ]
       ]
     ]
@@ -148,8 +158,8 @@ view address model =
   div [ ] [
     viewButtonlist address model,
     viewExpenseForm address model,
-    h3 [ ] [ text "This week" ],
-    viewExpenseList model
+    h3 [ class "text-center" ] [ text "This week" ],
+    viewExpenseList address model
   ]
 
 
@@ -179,6 +189,12 @@ addExpense user expense =
       |> Task.map UpdateAdded
       |> Effects.task
 
+
+-- TODO: continue implementation
+-- deleteExpense : User -> Expense -> Effects Action
+-- deleteExpense user expense =
+--
+--
 
 expensesUrl : User -> String
 expensesUrl user =
