@@ -198,13 +198,15 @@ addExpense user expense =
 
 expensesUrl : User -> String
 expensesUrl user =
-  Http.url "http://localhost:3000/expenses" (authParams user)
+  Http.url "http://api.hoboapp.com/expenses" (authParams user)
+--  Http.url "http://localhost:3000/expenses" (authParams user)
 
 
 expenseUrl : User -> BudgetId -> String
 expenseUrl user budgetId =
   let
-    baseUrl = "http://localhost:3000/budgets/" ++ (toString budgetId) ++ "/expenses"
+    baseUrl = "http://api.hoboapp.com/budgets/" ++ (toString budgetId) ++ "/expenses"
+    -- baseUrl = "http://localhost:3000/budgets/" ++ (toString budgetId) ++ "/expenses"
   in
     Http.url baseUrl (authParams user)
 

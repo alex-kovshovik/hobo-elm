@@ -64,7 +64,8 @@ class HoboJs {
   handleFacebookResponse (fbResponse) {
     fbResponse.facebookAccessToken = this.facebookAccessToken // Mutation, but fuck it, my main app is in Elm LOL!
 
-    $.post('http://localhost:3000/auth/register', fbResponse, this.handleRegisterResponse.bind(this)).fail(function (data) {
+    // $.post('http://localhost:3000/auth/register', fbResponse, this.handleRegisterResponse.bind(this)).fail(function (data) {
+    $.post('http://api.hoboapp.com/auth/register', fbResponse, this.handleRegisterResponse.bind(this)).fail(function (data) {
       alert('Error registering user account')
     })
   }
