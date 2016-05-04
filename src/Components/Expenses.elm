@@ -105,9 +105,7 @@ expenseItem address expense =
   tr [ ] [
     td [ ] [ text (format "%b %d" expense.createdAt) ],
     td [ ] [ text expense.budgetName ],
-    td [ class "text-right" ] [ text (formatAmount expense.amount) ],
-    td [ ] [ text "X" ]
-    -- td [ ] [ button [ class "delete", onClick address (RequestRemove expense) ] [ text "X" ] ]
+    td [ class "text-right" ] [ text (formatAmount expense.amount) ]
   ]
 
 viewExpenseList : Address Action -> Model -> Html
@@ -124,8 +122,7 @@ viewExpenseList address model =
         tr [ ] [
           th [ ] [ text "" ],
           th [ ] [ text "Total:" ],
-          th [ class "text-right" ] [ text (formatAmount total) ],
-          th [ ] [ text "" ]
+          th [ class "text-right" ] [ text (formatAmount total) ]
         ]
       ]
     ]
@@ -198,15 +195,13 @@ addExpense user expense =
 
 expensesUrl : User -> String
 expensesUrl user =
-  Http.url "http://api.hoboapp.com/expenses" (authParams user)
---  Http.url "http://localhost:3000/expenses" (authParams user)
+  Http.url (user.apiBaseUrl ++ "expenses") (authParams user)
 
 
 expenseUrl : User -> BudgetId -> String
 expenseUrl user budgetId =
   let
-    baseUrl = "http://api.hoboapp.com/budgets/" ++ (toString budgetId) ++ "/expenses"
-    -- baseUrl = "http://localhost:3000/budgets/" ++ (toString budgetId) ++ "/expenses"
+    baseUrl = user.apiBaseUrl ++ "budgets/" ++ (toString budgetId) ++ "/expenses"
   in
     Http.url baseUrl (authParams user)
 

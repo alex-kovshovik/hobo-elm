@@ -12,10 +12,7 @@ html {
 }
 
 body {
-  position: relative;
   margin: 0;
-  padding-bottom: 6rem;
-  min-height: 100%;
   font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -26,19 +23,17 @@ button:disabled {
   color: lightgray
 }
 
-
 /**
  * Footer Styles
  */
-
 .footer {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 1rem;
+  position:fixed;
+  top:calc( 100% - 54px );
+  height:54px;
+  width:100%;
   background-color: #efefef;
   text-align: center;
+  padding: 16px;
 }
 
 .mt1 {

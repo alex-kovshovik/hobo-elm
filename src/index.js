@@ -24,11 +24,29 @@ class HoboJs {
 
   getAuth () {
     const storedAuth = window.localStorage.getItem(hoboAuthKey)
-    return storedAuth ? JSON.parse(storedAuth) : this.getDefaultAuth()
+    const auth = storedAuth ? JSON.parse(storedAuth) : this.getDefaultAuth()
+
+    if (!auth.apiBaseUrl) {
+      auth.apiBaseUrl = this.getHoboApiUrl()
+    }
+
+    return auth
   }
 
   getDefaultAuth () {
     return { email: '', token: '', authenticated: false }
+  }
+
+  getHoboApiUrl() {
+    let location = window.location;
+
+    if (location.hostname === 'localhost') {
+      // Assume default Rails port 3000, running on localhost.
+      return 'http://localhost:3000/'
+    } else {
+      // Assume http(s)://api.<hostname>
+      return location.protocol + '//' + 'api' + location.hostname + '/'
+    }
   }
 
   setAuth (hoboAuth) {
@@ -63,9 +81,9 @@ class HoboJs {
 
   handleFacebookResponse (fbResponse) {
     fbResponse.facebookAccessToken = this.facebookAccessToken // Mutation, but fuck it, my main app is in Elm LOL!
+    const apiBaseUrl = this.getHoboApiUrl()
 
-    // $.post('http://localhost:3000/auth/register', fbResponse, this.handleRegisterResponse.bind(this)).fail(function (data) {
-    $.post('http://api.hoboapp.com/auth/register', fbResponse, this.handleRegisterResponse.bind(this)).fail(function (data) {
+    $.post(apiBaseUrl + 'auth/register', fbResponse, this.handleRegisterResponse.bind(this)).fail(function (data) {
       alert('Error registering user account')
     })
   }

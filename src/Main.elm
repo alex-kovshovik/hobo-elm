@@ -22,7 +22,7 @@ initialModel : (Model, Effects Action)
 initialModel =
   let
     data = Expenses.initialModel
-    user = User "" "" False
+    user = User "" "" False ""
   in
     (Model data user, Effects.none)
 

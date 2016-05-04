@@ -75,8 +75,8 @@ getBudgets user =
 
 budgetsUrl : User -> String
 budgetsUrl user =
-  -- Http.url "http://localhost:3000/budgets"
-  Http.url "http://api.hoboapp.com/budgets"
+  Http.url (user.apiBaseUrl ++ "budgets")
+  -- Http.url "http://api.hoboapp.com/budgets"
     [ ("user_token", user.token),
       ("user_email", user.email) ]
 
