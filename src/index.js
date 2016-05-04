@@ -45,7 +45,7 @@ class HoboJs {
       return 'http://localhost:3000/'
     } else {
       // Assume http(s)://api.<hostname>
-      return location.protocol + '//' + 'api' + location.hostname + '/'
+      return location.protocol + '//' + 'api.' + location.hostname + '/'
     }
   }
 
