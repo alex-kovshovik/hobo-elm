@@ -12,7 +12,6 @@ import Http.Extra as HttpExtra exposing (..)
 import Json.Decode as Json exposing((:=))
 import Json.Encode
 import Date
-import Date.Format exposing (format)
 
 import Records exposing (Expense, Budget, RecordId)
 import Components.BudgetButtonList as BBL
@@ -103,7 +102,13 @@ formatAmount amount =
 expenseItem : Address Action -> Expense -> Html
 expenseItem address expense =
   tr [ ] [
-    td [ ] [ text (format "%b %d" expense.createdAt) ],
+    -- td [ ] [ text (format "%b %d" expense.createdAt) ],
+    td [ ] [
+      span [ class "date" ] [
+        div [ class "date-header" ] [ text (Date.month expense.createdAt |> toString) ],
+        div [ class "date-day" ] [ text (Date.day expense.createdAt |> toString) ]
+      ]
+    ],
     td [ ] [ text expense.budgetName ],
     td [ class "text-right" ] [ text (formatAmount expense.amount) ]
   ]
