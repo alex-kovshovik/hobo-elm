@@ -15,10 +15,10 @@ class HoboJs {
       this.showFacebookLogin()
     }
 
-    this.elmApp = Elm.embed(Elm.Main, document.getElementById('main'), { loginSuccess: hoboAuth })
+    this.elmApp = Elm.embed(Elm.Main, document.getElementById('main'), { userData: hoboAuth })
 
     if (hoboAuth.authenticated) {
-      this.elmApp.ports.loginSuccess.send(hoboAuth)
+      this.elmApp.ports.userData.send(hoboAuth)
     }
   }
 
@@ -96,7 +96,7 @@ class HoboJs {
     auth.authenticated = true
     this.setAuth(auth)
 
-    this.elmApp.ports.loginSuccess.send(auth)
+    this.elmApp.ports.userData.send(auth)
     this.hideFacebookLogin()
   }
 

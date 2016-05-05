@@ -92,7 +92,7 @@ main =
 -- SIGNALS
 loginActions : Signal Action
 loginActions =
-  Signal.map Login loginSuccess
+  Signal.map Login userData
 
 
 -- PORTS
@@ -101,4 +101,4 @@ port tasks =
   app.tasks
 
 
-port loginSuccess : Signal User
+port userData : Signal User
