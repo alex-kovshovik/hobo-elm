@@ -142,25 +142,19 @@ expenseItem address expense =
       td [ class "text-right" ] [ Amount.view amountAddress expense ]
     ]
 
-viewExpenseList : Address Action -> Model -> Html
-viewExpenseList address model =
-  let
-    filter expense =
-      Just expense.budgetId == model.buttons.currentBudgetId || model.buttons.currentBudgetId == Nothing
-    expenses = List.filter filter model.expenses
-    total = List.foldl (\ex sum -> sum + ex.amount) 0.0 expenses
-  in
-    table [ ] [
-      tbody [ ] (List.map (expenseItem address) expenses),
-      tfoot [ ] [
-        tr [ ] [
-          th [ ] [ text "" ],
-          th [ ] [ text "" ],
-          th [ ] [ text "Total:" ],
-          th [ class "text-right" ] [ text (formatAmount total) ]
-        ]
+viewExpenseList : Address Action -> List Expense -> String -> Html
+viewExpenseList address filteredExpenses totalString =
+  table [ ] [
+    tbody [ ] (List.map (expenseItem address) filteredExpenses),
+    tfoot [ ] [
+      tr [ ] [
+        th [ ] [ text "" ],
+        th [ ] [ text "" ],
+        th [ ] [ text "Total:" ],
+        th [ class "text-right" ] [ text totalString ]
       ]
     ]
+  ]
 
 
 viewExpenseForm : Address Action -> Model -> Html
@@ -187,17 +181,24 @@ viewButtonlist address model =
 
 view : Address Action -> Model -> Html
 view address model =
-  div [ onClick address (CancelDelete "delete") ] [
-    div [ class "col-12" ] [
-      viewButtonlist address model,
-      viewExpenseForm address model
-    ],
+  let
+    filter expense =
+      Just expense.budgetId == model.buttons.currentBudgetId || model.buttons.currentBudgetId == Nothing
+    expenses = List.filter filter model.expenses
+    total = List.foldl (\ex sum -> sum + ex.amount) 0.0 expenses
+    totalString = formatAmount total
+  in
+    div [ onClick address (CancelDelete "delete") ] [
+      div [ class "col-12" ] [
+        viewButtonlist address model,
+        viewExpenseForm address model
+      ],
 
-    div [ class "col-12 push-2-tablet push-3-desktop push-3-hd col-8-tablet col-6-desktop col-5-hd" ] [
-      h3 [ class "text-center" ] [ text "This week" ],
-      viewExpenseList address model
+      div [ class "col-12 push-2-tablet push-3-desktop push-3-hd col-8-tablet col-6-desktop col-5-hd" ] [
+        h3 [ class "text-center" ] [ text ("This week " ++ "(" ++ totalString ++ ")")],
+        viewExpenseList address expenses totalString
+      ]
     ]
-  ]
 
 
 -- EFFECTS
