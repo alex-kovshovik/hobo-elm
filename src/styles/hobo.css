@@ -84,3 +84,18 @@ div.date-header {
 div.date-day {
   font-size: 0.8rem;
 }
+
+a.amount-link {
+  color: black;
+  text-decoration: none;
+}
+
+a.amount-link:hover {
+  text-decoration: underline;
+  cursor: grab;
+}
+
+a.amount-delete-link {
+  color: red;
+  font-weight: bold;
+}

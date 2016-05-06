@@ -4,7 +4,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Signal exposing (Address)
-import Numeral
 import Task
 import Effects exposing (Effects)
 import Http
@@ -16,7 +15,9 @@ import Date
 import Records exposing (Expense, Budget, RecordId)
 import Components.BudgetButtonList as BBL
 import Components.Login exposing (User)
-import Utils.Numbers exposing (onInput, toFloatPoh)
+import Components.Amount as Amount
+
+import Utils.Numbers exposing (onInput, toFloatPoh, formatAmount)
 import Utils.Parsers exposing (resultToList, resultToObject)
 
 -- MODEL
@@ -39,11 +40,13 @@ initialModel =
 type Action
   = AmountInput String
   | BudgetList BBL.Action
+  | AmountView RecordId Amount.Action
 
   -- adding/removing expenses
   | RequestAdd
   | RequestRemove Expense
   | UpdateAdded (Result (Error Expense) (Response Expense))
+  | UpdateRemoved (Result (Error Expense) (Response Expense))
 
   -- loading and displaying the list
   | RequestList
@@ -61,11 +64,22 @@ update user action model =
       in
         ({ model | buttons = buttonData }, Effects.map BudgetList fx)
 
+    AmountView expenseId action ->
+      let
+        updateFunc expenseId expense =
+          if expenseId == expense.id then Amount.update action expense else expense
+
+        expenses = List.map (updateFunc expenseId) model.expenses
+
+        fx = if action == Amount.Delete then deleteExpense user expenseId else Effects.none
+      in
+        ({ model | expenses = expenses }, fx)
+
     -- adding/removing expenses
     RequestAdd ->
       let
         budgetId = Maybe.withDefault -1 model.buttons.currentBudgetId
-        newExpense = Expense 0 budgetId "" (toFloatPoh model.amount) "" (Date.fromTime 0)
+        newExpense = Expense 0 budgetId "" (toFloatPoh model.amount) "" (Date.fromTime 0) False
       in
         ({ model | amount = "" }, addExpense user newExpense)
 
@@ -85,6 +99,16 @@ update user action model =
       in
         ({ model | expenses = newExpenses}, Effects.none)
 
+    UpdateRemoved expenseResult ->
+      let
+        deletedExpense = resultToObject expenseResult
+
+        newExpenses = case deletedExpense of
+          Just expense -> List.filter (\e -> e.id /= expense.id) model.expenses
+          Nothing -> model.expenses
+      in
+        ({ model | expenses = newExpenses }, Effects.none)
+
     -- loading and displaying the list
     RequestList ->
       (model, getExpenses user)
@@ -94,24 +118,21 @@ update user action model =
 
 
 -- VIEW
-formatAmount : Float -> String
-formatAmount amount =
-  Numeral.format "$0,0.00" amount
-
-
 expenseItem : Address Action -> Expense -> Html
 expenseItem address expense =
-  tr [ ] [
-    -- td [ ] [ text (format "%b %d" expense.createdAt) ],
-    td [ ] [
-      span [ class "date" ] [
-        div [ class "date-header" ] [ text (Date.month expense.createdAt |> toString) ],
-        div [ class "date-day" ] [ text (Date.day expense.createdAt |> toString) ]
-      ]
-    ],
-    td [ ] [ text expense.budgetName ],
-    td [ class "text-right" ] [ text (formatAmount expense.amount) ]
-  ]
+  let
+    amountAddress = Signal.forwardTo address (AmountView expense.id)
+  in
+    tr [ ] [
+      td [ ] [
+        span [ class "date" ] [
+          div [ class "date-header" ] [ text (Date.month expense.createdAt |> toString) ],
+          div [ class "date-day" ] [ text (Date.day expense.createdAt |> toString) ]
+        ]
+      ],
+      td [ ] [ text expense.budgetName ],
+      td [ class "text-right" ] [ Amount.view amountAddress expense ]
+    ]
 
 viewExpenseList : Address Action -> Model -> Html
 viewExpenseList address model =
@@ -192,11 +213,14 @@ addExpense user expense =
       |> Effects.task
 
 
--- TODO: continue implementation
--- deleteExpense : User -> Expense -> Effects Action
--- deleteExpense user expense =
---
---
+deleteExpense : User -> RecordId -> Effects Action
+deleteExpense user expenseId =
+  delete (deleteExpenseUrl user expenseId)
+    |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
+    |> Task.toResult
+    |> Task.map UpdateRemoved
+    |> Effects.task
+
 
 expensesUrl : User -> String
 expensesUrl user =
@@ -207,6 +231,13 @@ expenseUrl : User -> BudgetId -> String
 expenseUrl user budgetId =
   let
     baseUrl = user.apiBaseUrl ++ "budgets/" ++ (toString budgetId) ++ "/expenses"
+  in
+    Http.url baseUrl (authParams user)
+
+deleteExpenseUrl : User -> RecordId -> String
+deleteExpenseUrl user expenseId =
+  let
+    baseUrl = user.apiBaseUrl ++ "expenses/" ++ (toString expenseId)
   in
     Http.url baseUrl (authParams user)
 
@@ -239,11 +270,11 @@ decodeExpenseFields =
 
 
 convertDecoding : RecordId -> RecordId -> String -> String -> String -> Expense
-convertDecoding id budgetId budgetName amount createdAtString =
+convertDecoding id budgetId budgetName amount createdAtString  =
   let
     dateResult = Date.fromString createdAtString
     createdAt = case dateResult of
                   Ok date -> date
                   Err error -> Date.fromTime 0
   in
-    Expense id budgetId budgetName (toFloatPoh amount) "" createdAt
+    Expense id budgetId budgetName (toFloatPoh amount) "" createdAt False

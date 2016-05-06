@@ -15,5 +15,6 @@ type alias Expense = {
   budgetName: String,
   amount : Float,
   comment : String,
-  createdAt : Date
+  createdAt : Date,
+  clicked : Bool
 }
