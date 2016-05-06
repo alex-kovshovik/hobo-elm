@@ -2,14 +2,22 @@ module Components.Amount where
 
 import Html exposing (..)
 import Html.Attributes exposing(class)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onWithOptions)
 import Signal exposing (Address)
+import Json.Decode as Json
 
 import Records exposing (Expense)
 
 import Utils.Numbers exposing (formatAmount)
 
 type Action = Click | Delete
+
+onClick : Address Action -> Action -> Attribute
+onClick address action =
+  let
+    options = { stopPropagation = True, preventDefault = True }
+  in
+    onWithOptions "click" options Json.value (\_ -> Signal.message address action)
 
 update : Action -> Expense -> Expense
 update action expense =

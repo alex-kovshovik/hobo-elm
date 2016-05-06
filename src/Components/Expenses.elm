@@ -47,6 +47,7 @@ type Action
   | RequestRemove Expense
   | UpdateAdded (Result (Error Expense) (Response Expense))
   | UpdateRemoved (Result (Error Expense) (Response Expense))
+  | CancelDelete String
 
   -- loading and displaying the list
   | RequestList
@@ -107,6 +108,13 @@ update user action model =
           Nothing -> model.expenses
       in
         ({ model | expenses = newExpenses }, Effects.none)
+
+    CancelDelete target ->
+      let
+        newExpenses = List.map (\e -> { e | clicked = False }) model.expenses
+        _ = Debug.log "cancel delete happened" False
+      in
+        ({ model | expenses = newExpenses}, Effects.none)
 
     -- loading and displaying the list
     RequestList ->
@@ -179,7 +187,7 @@ viewButtonlist address model =
 
 view : Address Action -> Model -> Html
 view address model =
-  div [ ] [
+  div [ onClick address (CancelDelete "delete") ] [
     div [ class "col-12" ] [
       viewButtonlist address model,
       viewExpenseForm address model
