@@ -69,7 +69,7 @@ view address model =
     div [ class "clear col-12 mt1" ] [
       text ("Welcome " ++ model.user.email)
     ],
-    div [ class "clear col-12 mt1" ] [
+    div [ class "clear mt1" ] [
       Expenses.view (Signal.forwardTo address List) model.data
     ]
   ]

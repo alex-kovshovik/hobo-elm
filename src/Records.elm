@@ -13,6 +13,7 @@ type alias Expense = {
   id : RecordId,
   budgetId: RecordId,
   budgetName: String,
+  createdByName: String,
   amount : Float,
   comment : String,
   createdAt : Date,

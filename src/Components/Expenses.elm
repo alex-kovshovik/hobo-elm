@@ -79,7 +79,7 @@ update user action model =
     RequestAdd ->
       let
         budgetId = Maybe.withDefault -1 model.buttons.currentBudgetId
-        newExpense = Expense 0 budgetId "" (toFloatPoh model.amount) "" (Date.fromTime 0) False
+        newExpense = Expense 0 budgetId "" "" (toFloatPoh model.amount) "" (Date.fromTime 0) False
       in
         ({ model | amount = "" }, addExpense user newExpense)
 
@@ -93,9 +93,8 @@ update user action model =
       let
         newExpense = resultToObject expenseResult
         newExpenses = case newExpense of
-          Just expense -> expense::model.expenses
+          Just expense -> expense :: model.expenses
           Nothing -> model.expenses
-
       in
         ({ model | expenses = newExpenses}, Effects.none)
 
@@ -131,6 +130,7 @@ expenseItem address expense =
         ]
       ],
       td [ ] [ text expense.budgetName ],
+      td [ ] [ text expense.createdByName ],
       td [ class "text-right" ] [ Amount.view amountAddress expense ]
     ]
 
@@ -146,6 +146,7 @@ viewExpenseList address model =
       tbody [ ] (List.map (expenseItem address) expenses),
       tfoot [ ] [
         tr [ ] [
+          th [ ] [ text "" ],
           th [ ] [ text "" ],
           th [ ] [ text "Total:" ],
           th [ class "text-right" ] [ text (formatAmount total) ]
@@ -179,10 +180,15 @@ viewButtonlist address model =
 view : Address Action -> Model -> Html
 view address model =
   div [ ] [
-    viewButtonlist address model,
-    viewExpenseForm address model,
-    h3 [ class "text-center" ] [ text "This week" ],
-    viewExpenseList address model
+    div [ class "col-12" ] [
+      viewButtonlist address model,
+      viewExpenseForm address model
+    ],
+
+    div [ class "col-12 push-2-tablet push-3-desktop push-3-hd col-8-tablet col-6-desktop col-5-hd" ] [
+      h3 [ class "text-center" ] [ text "This week" ],
+      viewExpenseList address model
+    ]
   ]
 
 
@@ -261,20 +267,21 @@ decodeExpense =
 
 decodeExpenseFields : Json.Decoder Expense
 decodeExpenseFields =
-  Json.object5 convertDecoding
-    ( "id"          := Json.int )
-    ( "budget_id"   := Json.int )
-    ( "budget_name" := Json.string )
-    ( "amount"      := Json.string )
-    ( "created_at"  := Json.string )
+  Json.object6 convertDecoding
+    ( "id"              := Json.int )
+    ( "budget_id"       := Json.int )
+    ( "budget_name"     := Json.string )
+    ( "created_by_name" := Json.string )
+    ( "amount"          := Json.string )
+    ( "created_at"      := Json.string )
 
 
-convertDecoding : RecordId -> RecordId -> String -> String -> String -> Expense
-convertDecoding id budgetId budgetName amount createdAtString  =
+convertDecoding : RecordId -> RecordId -> String -> String -> String -> String -> Expense
+convertDecoding id budgetId budgetName createdByName amount createdAtString  =
   let
     dateResult = Date.fromString createdAtString
     createdAt = case dateResult of
                   Ok date -> date
                   Err error -> Date.fromTime 0
   in
-    Expense id budgetId budgetName (toFloatPoh amount) "" createdAt False
+    Expense id budgetId budgetName createdByName (toFloatPoh amount) "" createdAt False
