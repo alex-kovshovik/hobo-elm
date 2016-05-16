@@ -1,16 +1,16 @@
-module Main where
+module Main exposing(..)
 
 import Html exposing (..)
 import Html.Attributes exposing(..)
+import Html.App as Html exposing(map)
 
-import StartApp as StartApp
-import Signal exposing (Address)
-import Effects exposing (Effects, Never)
 import Task
+import Debug
 
 import Components.Expenses as Expenses exposing (getExpenses)
 import Components.BudgetButtonList exposing (getBudgets)
 import Components.Login exposing (User)
+import Ports exposing(userData)
 
 -- MODEL
 type alias Model = {
@@ -18,87 +18,78 @@ type alias Model = {
   user: User
 }
 
-initialModel : (Model, Effects Action)
+initialModel : (Model, Cmd Msg)
 initialModel =
   let
     data = Expenses.initialModel
     user = User "" "" False ""
   in
-    (Model data user, Effects.none)
+    (Model data user, Cmd.none)
 
-initialLoadEffects : User -> Effects Action
+initialLoadEffects : User -> Cmd Msg
 initialLoadEffects user =
   if user.authenticated
-    then Effects.batch [ loadExpensesEffect user, loadBudgetsEffect user ]
-    else Effects.none
+    then Cmd.batch [ loadExpensesEffect user, loadBudgetsEffect user ]
+    else Cmd.none
 
 
-loadExpensesEffect : User -> Effects Action
+loadExpensesEffect : User -> Cmd Msg
 loadExpensesEffect user =
-  getExpenses user |> Effects.map List
+  getExpenses user |> Cmd.map List
 
 
-loadBudgetsEffect : User -> Effects Action
+loadBudgetsEffect : User -> Cmd Msg
 loadBudgetsEffect user =
-  getBudgets user |> Effects.map Expenses.BudgetList |> Effects.map List
+  getBudgets user |> Cmd.map Expenses.BudgetList |> Cmd.map List
 
 
 -- UPDATE
-type Action
-  = List Expenses.Action
+type Msg
+  = List Expenses.Msg
   | Login User
 
 
-update : Action -> Model -> (Model, Effects Action)
-update action model =
-  case action of
-    List listAction ->
-      let
-        (listData, fx) = Expenses.update model.user listAction model.data
-      in
-        ({ model | data = listData }, Effects.map List fx)
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg model =
+  let
+    _ = Debug.log "Update function called" model
+  in
+    case msg of
+      List listAction ->
+        let
+          (listData, fx) = Expenses.update model.user listAction model.data
+        in
+          ({ model | data = listData }, Cmd.map List fx)
 
-    Login user ->
-      ({ model | user = user }, initialLoadEffects user)
+      Login user ->
+        let
+          _ = Debug.log "Something" user
+        in
+          ({ model | user = user }, initialLoadEffects user)
 
 
 -- VIEW
-view : Address Action -> Model -> Html
-view address model =
+view : Model -> Html Msg
+view model =
   div [ class "container"] [
     div [ class "clear col-12 mt1" ] [
       text ("Welcome " ++ model.user.email)
     ],
     div [ class "clear mt1" ] [
-      Expenses.view (Signal.forwardTo address List) model.data
+      map List (Expenses.view model.data)
     ]
   ]
 
 -- WIRE STUFF UP
-app : StartApp.App Model
-app =
-  StartApp.start {
+main : Program Never
+main =
+  Html.program {
       init = initialModel,
       update = update,
       view = view,
-      inputs = [ loginActions ]
+      subscriptions = subscriptions
     }
 
-main : Signal Html
-main =
-  app.html
 
-
--- SIGNALS
-loginActions : Signal Action
-loginActions =
-  Signal.map Login userData
-
-
--- PORTS
-port tasks : Signal (Task.Task Never ())
-port tasks =
-  app.tasks
-
-
-port userData : Signal User
+subscriptions model =
+  userData Login

@@ -1,4 +1,4 @@
-module Components.Login where
+module Components.Login exposing(..)
 
 type alias User = {
   email: String,

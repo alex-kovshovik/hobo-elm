@@ -15,10 +15,13 @@ class HoboJs {
       this.showFacebookLogin()
     }
 
-    this.elmApp = Elm.embed(Elm.Main, document.getElementById('main'), { userData: hoboAuth })
+    // this.elmApp = Elm.Main.embed(document.getElementById('main'), { userData: hoboAuth })
+    this.elmApp = Elm.Main.embed(document.getElementById('main'))
 
     if (hoboAuth.authenticated) {
+      console.log("Sending data into a port...")
       this.elmApp.ports.userData.send(hoboAuth)
+      console.log("Data sent.")
     }
   }
 

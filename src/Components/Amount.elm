@@ -1,35 +1,31 @@
-module Components.Amount where
+module Components.Amount exposing(..)
 
 import Html exposing (..)
 import Html.Attributes exposing(class)
-import Html.Events exposing (onWithOptions)
-import Signal exposing (Address)
+import Html.Events exposing (onWithOptions, Options)
 import Json.Decode as Json
 
 import Records exposing (Expense)
 
 import Utils.Numbers exposing (formatAmount)
 
-type Action = Click | Delete
+type Msg = Click | Delete
 
-onClick : Address Action -> Action -> Attribute
-onClick address action =
-  let
-    options = { stopPropagation = True, preventDefault = True }
-  in
-    onWithOptions "click" options Json.value (\_ -> Signal.message address action)
+onClick : Msg -> Attribute Msg
+onClick msg =
+  onWithOptions "click" (Options True True) (Json.succeed msg)
 
-update : Action -> Expense -> Expense
-update action expense =
-  case action of
+update : Msg -> Expense -> Expense
+update msg expense =
+  case msg of
     Click ->
       { expense | clicked = not expense.clicked }
 
     Delete ->
       expense
 
-view : Address Action -> Expense -> Html
-view address expense =
+view : Expense -> Html Msg
+view expense =
   if expense.clicked
-    then a [ onClick address Delete, class "amount-delete-link" ] [ text "Delete?" ]
-    else a [ onClick address Click, class "amount-link" ] [ text (formatAmount expense.amount) ]
+    then a [ onClick Delete, class "amount-delete-link" ] [ text "Delete?" ]
+    else a [ onClick Click, class "amount-link" ] [ text (formatAmount expense.amount) ]

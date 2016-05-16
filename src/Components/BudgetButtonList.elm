@@ -1,11 +1,9 @@
-module Components.BudgetButtonList where
+module Components.BudgetButtonList exposing(..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Signal exposing (Address)
 import Task
-import Effects exposing (Effects)
 import Http
 import Json.Decode as Json exposing((:=))
 
@@ -27,50 +25,50 @@ initialModel =
 
 
 -- UPDATE
-type Action
+type Msg
   = Toggle RecordId
   | Request
   | DisplayLoaded (Result Http.Error (List Budget))
 
 
-update : User -> Action -> Model -> (Model, Effects Action)
-update user action model =
-  case action of
+update : User -> Msg -> Model -> (Model, Cmd Msg)
+update user msg model =
+  case msg of
     Toggle id ->
       let
         currentBudgetId = if Just id == model.currentBudgetId
                             then Nothing
                             else Just id
       in
-        ({ model | currentBudgetId = currentBudgetId }, Effects.none)
+        ({ model | currentBudgetId = currentBudgetId }, Cmd.none)
 
     Request ->
       (model, getBudgets user)
 
     DisplayLoaded budgetsResult ->
-      ({ model | budgets = resultToList budgetsResult }, Effects.none)
+      ({ model | budgets = resultToList budgetsResult }, Cmd.none)
 
 
 -- VIEW
-viewBudgetButton: Address Action -> Model -> Budget -> Html
-viewBudgetButton address model budget =
+viewBudgetButton: Model -> Budget -> Html Msg
+viewBudgetButton model budget =
   li [ ] [
-    BudgetButton.view model.currentBudgetId (onClick address (Toggle budget.id)) budget
+    BudgetButton.view model.currentBudgetId (onClick (Toggle budget.id)) budget
   ]
 
 
-view : Address Action -> Model -> Html
-view address model =
-  ul [ class "list-unstyled list-inline" ] (List.map (viewBudgetButton address model) model.budgets)
+view : Model -> Html Msg
+view model =
+  ul [ class "list-unstyled list-inline" ] (List.map (viewBudgetButton model) model.budgets)
 
 
 -- EFFECTS
-getBudgets : User -> Effects Action
+-- TODO: change to display failure later
+getBudgets : User -> Cmd Msg
 getBudgets user =
   Http.get decodeBudgets (budgetsUrl user)
     |> Task.toResult
-    |> Task.map DisplayLoaded
-    |> Effects.task
+    |> Task.perform DisplayLoaded DisplayLoaded
 
 
 budgetsUrl : User -> String

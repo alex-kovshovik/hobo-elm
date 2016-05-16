@@ -1,7 +1,7 @@
-module Utils.Parsers where
+module Utils.Parsers exposing(..)
 
 -- import Http
-import Http.Extra as HttpExtra exposing (..)
+import HttpBuilder exposing (..)
 
 import Debug
 
@@ -27,19 +27,3 @@ resultToObject objectResult =
         errorMessage = Debug.log "resultToRecord loading/parsing error" error
       in
         Nothing
-
-
--- Not used right now
--- httpResultOk : Result Http.RawError Http.Response -> Bool
--- httpResultOk httpResult =
---   case httpResult of
---     Ok httpResponse ->
---       let
---         _ = Debug.log "httpResultOk response" httpResponse
---       in
---         if httpResponse.status == 200 then True else False
---     Err error ->
---       let
---         errorMessage = Debug.log "httpResultOk loading/parsing error" error
---       in
---         False

@@ -1,13 +1,12 @@
-module Components.Expenses where
+module Components.Expenses exposing(..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
-import Signal exposing (Address)
+import Html.Events exposing (onClick, onInput)
+import Html.App exposing(map)
 import Task
-import Effects exposing (Effects)
 import Http
-import Http.Extra as HttpExtra exposing (..)
+import HttpBuilder exposing (..)
 import Json.Decode as Json exposing((:=))
 import Json.Encode
 import Date
@@ -17,7 +16,7 @@ import Components.BudgetButtonList as BBL
 import Components.Login exposing (User)
 import Components.Amount as Amount
 
-import Utils.Numbers exposing (onInput, toFloatPoh, formatAmount)
+import Utils.Numbers exposing (toFloatPoh, formatAmount)
 import Utils.Parsers exposing (resultToList, resultToObject)
 
 -- MODEL
@@ -37,10 +36,10 @@ initialModel =
   Model BBL.initialModel [] 2 ""
 
 -- UPDATE
-type Action
+type Msg
   = AmountInput String
-  | BudgetList BBL.Action
-  | AmountView RecordId Amount.Action
+  | BudgetList BBL.Msg
+  | AmountView RecordId Amount.Msg
 
   -- adding/removing expenses
   | RequestAdd
@@ -53,26 +52,26 @@ type Action
   | RequestList
   | UpdateList (Result Http.Error (List Expense))
 
-update : User -> Action -> Model -> (Model, Effects Action)
-update user action model =
-  case action of
+update : User -> Msg -> Model -> (Model, Cmd Msg)
+update user msg model =
+  case msg of
     AmountInput amount ->
-      ({ model | amount = amount }, Effects.none)
+      ({ model | amount = amount }, Cmd.none)
 
     BudgetList bblAction ->
       let
         (buttonData, fx) = BBL.update user bblAction model.buttons
       in
-        ({ model | buttons = buttonData }, Effects.map BudgetList fx)
+        ({ model | buttons = buttonData }, Cmd.map BudgetList fx)
 
-    AmountView expenseId action ->
+    AmountView expenseId msg ->
       let
         updateFunc expenseId expense =
-          if expenseId == expense.id then Amount.update action expense else expense
+          if expenseId == expense.id then Amount.update msg expense else expense
 
         expenses = List.map (updateFunc expenseId) model.expenses
 
-        fx = if action == Amount.Delete then deleteExpense user expenseId else Effects.none
+        fx = if msg == Amount.Delete then deleteExpense user expenseId else Cmd.none
       in
         ({ model | expenses = expenses }, fx)
 
@@ -88,7 +87,7 @@ update user action model =
       let
         newExpenses = List.filter (\ex -> ex.id /= expense.id) model.expenses
       in
-        ({ model | expenses = newExpenses}, Effects.none)
+        ({ model | expenses = newExpenses}, Cmd.none)
 
     UpdateAdded expenseResult ->
       let
@@ -97,7 +96,7 @@ update user action model =
           Just expense -> expense :: model.expenses
           Nothing -> model.expenses
       in
-        ({ model | expenses = newExpenses}, Effects.none)
+        ({ model | expenses = newExpenses}, Cmd.none)
 
     UpdateRemoved expenseResult ->
       let
@@ -107,28 +106,27 @@ update user action model =
           Just expense -> List.filter (\e -> e.id /= expense.id) model.expenses
           Nothing -> model.expenses
       in
-        ({ model | expenses = newExpenses }, Effects.none)
+        ({ model | expenses = newExpenses }, Cmd.none)
 
     CancelDelete target ->
       let
         newExpenses = List.map (\e -> { e | clicked = False }) model.expenses
-        _ = Debug.log "cancel delete happened" False
       in
-        ({ model | expenses = newExpenses}, Effects.none)
+        ({ model | expenses = newExpenses}, Cmd.none)
 
     -- loading and displaying the list
     RequestList ->
       (model, getExpenses user)
 
     UpdateList expensesResult ->
-      ({ model | expenses = resultToList expensesResult}, Effects.none)
+      ({ model | expenses = resultToList expensesResult}, Cmd.none)
 
 
 -- VIEW
-expenseItem : Address Action -> Expense -> Html
-expenseItem address expense =
+expenseItem : Expense -> Html Msg
+expenseItem expense =
   let
-    amountAddress = Signal.forwardTo address (AmountView expense.id)
+    amountView = map (AmountView expense.id) (Amount.view expense)
   in
     tr [ ] [
       td [ ] [
@@ -139,13 +137,13 @@ expenseItem address expense =
       ],
       td [ ] [ text expense.budgetName ],
       td [ ] [ text expense.createdByName ],
-      td [ class "text-right" ] [ Amount.view amountAddress expense ]
+      td [ class "text-right" ] [ amountView ]
     ]
 
-viewExpenseList : Address Action -> List Expense -> String -> Html
-viewExpenseList address filteredExpenses totalString =
+viewExpenseList : List Expense -> String -> Html Msg
+viewExpenseList filteredExpenses totalString =
   table [ ] [
-    tbody [ ] (List.map (expenseItem address) filteredExpenses),
+    tbody [ ] (List.map expenseItem filteredExpenses),
     tfoot [ ] [
       tr [ ] [
         th [ ] [ text "" ],
@@ -157,8 +155,8 @@ viewExpenseList address filteredExpenses totalString =
   ]
 
 
-viewExpenseForm : Address Action -> Model -> Html
-viewExpenseForm address model =
+viewExpenseForm : Model -> Html Msg
+viewExpenseForm model =
   div [ class "field-group clear row" ] [
     div [ class "col-9" ] [
       input [ class "field",
@@ -168,19 +166,19 @@ viewExpenseForm address model =
               value model.amount,
               placeholder "Amount",
               autocomplete False,
-              onInput address AmountInput ] [ ]
+              onInput AmountInput ] [ ]
     ],
     div [ class "col-2" ] [
-      button [ class "button", onClick address RequestAdd, disabled (model.buttons.currentBudgetId == Nothing || model.amount == "") ] [ text "Add" ]
+      button [ class "button", onClick RequestAdd, disabled (model.buttons.currentBudgetId == Nothing || model.amount == "") ] [ text "Add" ]
     ]
   ]
 
-viewButtonlist : Address Action -> Model -> Html
-viewButtonlist address model =
-  BBL.view (Signal.forwardTo address BudgetList) model.buttons
+viewButtonlist : Model -> Html Msg
+viewButtonlist model =
+  map BudgetList (BBL.view model.buttons)
 
-view : Address Action -> Model -> Html
-view address model =
+view : Model -> Html Msg
+view model =
   let
     filter expense =
       Just expense.budgetId == model.buttons.currentBudgetId || model.buttons.currentBudgetId == Nothing
@@ -188,29 +186,28 @@ view address model =
     total = List.foldl (\ex sum -> sum + ex.amount) 0.0 expenses
     totalString = formatAmount total
   in
-    div [ onClick address (CancelDelete "delete") ] [
+    div [ onClick (CancelDelete "delete") ] [
       div [ class "col-12" ] [
-        viewButtonlist address model,
-        viewExpenseForm address model
+        viewButtonlist model,
+        viewExpenseForm model
       ],
 
       div [ class "col-12 push-2-tablet push-3-desktop push-3-hd col-8-tablet col-6-desktop col-5-hd" ] [
         h3 [ class "text-center" ] [ text ("This week " ++ "(" ++ totalString ++ ")")],
-        viewExpenseList address expenses totalString
+        viewExpenseList expenses totalString
       ]
     ]
 
 
 -- EFFECTS
-getExpenses : User -> Effects Action
+getExpenses : User -> Cmd Msg
 getExpenses user =
   Http.get decodeExpenses (expensesUrl user)
     |> Task.toResult
-    |> Task.map UpdateList
-    |> Effects.task
+    |> Task.perform UpdateList UpdateList
 
 
-addExpense : User -> Expense -> Effects Action
+addExpense : User -> Expense -> Cmd Msg
 addExpense user expense =
   let
     expenseJson = Json.Encode.object [
@@ -224,17 +221,15 @@ addExpense user expense =
       |> withJsonBody expenseJson
       |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
       |> Task.toResult
-      |> Task.map UpdateAdded
-      |> Effects.task
+      |> Task.perform UpdateAdded UpdateAdded
 
 
-deleteExpense : User -> RecordId -> Effects Action
+deleteExpense : User -> RecordId -> Cmd Msg
 deleteExpense user expenseId =
   delete (deleteExpenseUrl user expenseId)
     |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
     |> Task.toResult
-    |> Task.map UpdateRemoved
-    |> Effects.task
+    |> Task.perform UpdateRemoved UpdateRemoved
 
 
 expensesUrl : User -> String
