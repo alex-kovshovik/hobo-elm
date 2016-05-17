@@ -21,8 +21,22 @@
 
   <div id="fblogin" style="display:none" class="container">
     <div class="clear col-12 mt1">
-      <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
-      </fb:login-button>
+      <h1>Welcome to HOBO!</h1>
+
+      <p>
+        HOBO = <u>Highly Opinionated</u> Budget Organizer
+      </p>
+
+      <p>
+        <img class="img-fluid" src="img/hobo.jpg" title="Hobo : highly opinionated budget organizer" alt="Hobo" />
+      </p>
+
+      <p>
+        <fb:login-button scope="public_profile,email"
+                         onlogin="checkLoginState();"
+                         data-size="xlarge">
+        </fb:login-button>
+      </p>
     </div>
   </div>
 

@@ -6,6 +6,7 @@ require('font-awesome-webpack')
 const Elm = require('./Main')
 
 const hoboAuthKey = 'hobo-auth'
+const fbAppId = location.hostname === 'localhost' ? '1766948786854513' : '1752657608283631'
 
 class HoboJs {
   constructor () {
@@ -108,7 +109,7 @@ class HoboJs {
     if (response.status === 'connected') {
       this.facebookAccessToken = response.authResponse.accessToken // Another mutation and also fuck it - see above LOL!
 
-      FB.api('/me?fields=name,email,timezone', this.handleFacebookResponse.bind(this))
+      FB.api('/me?fields=name,email,currency,timezone', this.handleFacebookResponse.bind(this))
     } else if (response.status === 'not_authorized') {
       alert('Facebook login is not authorized')
     } else {
@@ -128,9 +129,8 @@ window.checkLoginState = function () {
 
 window.fbAsyncInit = function () {
   FB.init({
-    appId: '1752657608283631',
-    cookie: true,  // enable cookies to allow the server to access
-                        // the session
+    appId: fbAppId,
+    cookie: true,  // enable cookies to allow the server to access the session
     xfbml: true,  // parse social plugins on this page
     version: 'v2.5' // use graph api version 2.5
   })
