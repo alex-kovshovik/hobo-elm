@@ -53,6 +53,10 @@ type Msg
   | RequestList
   | UpdateList (Result Http.Error (List Expense))
 
+  -- navigating between weeks
+  | LoadPreviousWeek
+  | LoadNextWeek
+
 update : User -> Msg -> Model -> (Model, Cmd Msg)
 update user msg model =
   case msg of
@@ -122,6 +126,19 @@ update user msg model =
     UpdateList expensesResult ->
       ({ model | expenses = resultToList expensesResult}, Cmd.none)
 
+    -- navigating between weeks
+    LoadPreviousWeek ->
+      let
+        weekNumber = model.weekNumber - 1
+      in
+        ({ model | weekNumber = weekNumber }, getExpenses user weekNumber)
+
+    LoadNextWeek ->
+      let
+        weekNumber = if model.weekNumber < 0 then model.weekNumber + 1 else model.weekNumber
+      in
+        ({ model | weekNumber = weekNumber }, getExpenses user weekNumber)
+
 
 -- VIEW
 expenseItem : Expense -> Html Msg
@@ -143,14 +160,16 @@ expenseItem expense =
 
 viewExpenseList : List Expense -> String -> Html Msg
 viewExpenseList filteredExpenses totalString =
-  table [ ] [
-    tbody [ ] (List.map expenseItem filteredExpenses),
-    tfoot [ ] [
-      tr [ ] [
-        th [ ] [ text "" ],
-        th [ ] [ text "" ],
-        th [ ] [ text "Total:" ],
-        th [ class "text-right" ] [ text totalString ]
+  div [ class "clear col-12 push-2-tablet push-3-desktop push-3-hd col-8-tablet col-6-desktop col-5-hd" ] [
+    table [ ] [
+      tbody [ ] (List.map expenseItem filteredExpenses),
+      tfoot [ ] [
+        tr [ ] [
+          th [ ] [ text "" ],
+          th [ ] [ text "" ],
+          th [ ] [ text "Total:" ],
+          th [ class "text-right" ] [ text totalString ]
+        ]
       ]
     ]
   ]
@@ -178,6 +197,22 @@ viewButtonlist : Model -> Html Msg
 viewButtonlist model =
   map BudgetList (BBL.view model.buttons)
 
+
+weekHeader : Model -> String -> Html Msg
+weekHeader model total =
+  let
+    weekName = if model.weekNumber == 0 then "This week" else
+               if model.weekNumber == -1 then "Last week" else
+               (toString -model.weekNumber) ++ " weeks ago"
+  in
+    div [ class "col-12 push-2-tablet push-3-desktop push-3-hd col-8-tablet col-6-desktop col-5-hd" ] [
+      ul [ class "list-inline" ] [
+        li [ ] [ button [ class "left button", onClick LoadPreviousWeek ] [ text "<<" ] ],
+        li [ ] [ button [ class "left button strong ml05" ] [ text (weekName ++ " - " ++ total)] ],
+        li [ ] [ button [ class "left button ml05", onClick LoadNextWeek ] [ text ">>" ] ]
+      ]
+    ]
+
 view : Model -> Html Msg
 view model =
   let
@@ -188,13 +223,18 @@ view model =
     totalString = formatAmount total
   in
     div [ onClick (CancelDelete "delete") ] [
-      div [ class "col-12" ] [
-        viewButtonlist model,
-        viewExpenseForm model
+      div [ class "clear" ] [
+        div [ class "col-12" ] [
+          viewButtonlist model,
+          viewExpenseForm model
+        ]
       ],
 
-      div [ class "col-12 push-2-tablet push-3-desktop push-3-hd col-8-tablet col-6-desktop col-5-hd" ] [
-        h3 [ class "text-center" ] [ text ("This week " ++ "(" ++ totalString ++ ")")],
+      div [ class "clear" ] [
+        weekHeader model totalString
+      ],
+
+      div [ class "clear" ] [
         viewExpenseList expenses totalString
       ]
     ]
