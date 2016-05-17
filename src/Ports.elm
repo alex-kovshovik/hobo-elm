@@ -1,4 +1,4 @@
-port module Ports exposing(..)
+port module Ports exposing(userData)
 
 import Components.Login exposing (User)
 

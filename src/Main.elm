@@ -6,11 +6,24 @@ import Html.App as Html exposing(map)
 
 import Task
 import Debug
+import Time exposing(minute, Time)
 
 import Components.Expenses as Expenses exposing (getExpenses)
 import Components.BudgetButtonList exposing (getBudgets)
 import Components.Login exposing (User)
 import Ports exposing(userData)
+
+
+-- PROGRAM
+main : Program Never
+main =
+  Html.program {
+      init = initialModel,
+      update = update,
+      view = view,
+      subscriptions = subscriptions
+    }
+
 
 -- MODEL
 type alias Model = {
@@ -51,21 +64,18 @@ type Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  let
-    _ = Debug.log "Update function called" model
-  in
-    case msg of
-      List listAction ->
-        let
-          (listData, fx) = Expenses.update model.user listAction model.data
-        in
-          ({ model | data = listData }, Cmd.map List fx)
+  case msg of
+    List listAction ->
+      let
+        (listData, fx) = Expenses.update model.user listAction model.data
+      in
+        ({ model | data = listData }, Cmd.map List fx)
 
-      Login user ->
-        let
-          _ = Debug.log "Something" user
-        in
-          ({ model | user = user }, initialLoadEffects user)
+    Login user ->
+      let
+        _ = Debug.log "Something" user
+      in
+        ({ model | user = user }, initialLoadEffects user)
 
 
 -- VIEW
@@ -80,16 +90,7 @@ view model =
     ]
   ]
 
--- WIRE STUFF UP
-main : Program Never
-main =
-  Html.program {
-      init = initialModel,
-      update = update,
-      view = view,
-      subscriptions = subscriptions
-    }
 
-
+-- SUBSCRIPTIONS
 subscriptions model =
   userData Login

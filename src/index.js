@@ -19,9 +19,10 @@ class HoboJs {
     this.elmApp = Elm.Main.embed(document.getElementById('main'))
 
     if (hoboAuth.authenticated) {
-      console.log("Sending data into a port...")
-      this.elmApp.ports.userData.send(hoboAuth)
-      console.log("Data sent.")
+      // TODO: remove after https://github.com/elm-lang/core/issues/595 is resolved.
+      setTimeout(() => {
+        this.elmApp.ports.userData.send(hoboAuth)
+      }, 1)
     }
   }
 
@@ -37,7 +38,7 @@ class HoboJs {
   }
 
   getDefaultAuth () {
-    return { email: '', token: '', authenticated: false }
+    return { email: '', token: '', authenticated: false, apiBaseUrl: this.getHoboApiUrl() }
   }
 
   getHoboApiUrl() {
