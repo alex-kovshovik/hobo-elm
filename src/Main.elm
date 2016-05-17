@@ -48,7 +48,7 @@ initialLoadEffects user =
 
 loadExpensesEffect : User -> Cmd Msg
 loadExpensesEffect user =
-  getExpenses user |> Cmd.map List
+  getExpenses user 0 |> Cmd.map List
 
 
 loadBudgetsEffect : User -> Cmd Msg
@@ -72,10 +72,7 @@ update msg model =
         ({ model | data = listData }, Cmd.map List fx)
 
     Login user ->
-      let
-        _ = Debug.log "Something" user
-      in
-        ({ model | user = user }, initialLoadEffects user)
+      ({ model | user = user }, initialLoadEffects user)
 
 
 -- VIEW

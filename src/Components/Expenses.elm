@@ -24,6 +24,7 @@ type alias Model = {
   buttons : BBL.Model,
   expenses : List Expense,
   nextExpenseId : Int,
+  weekNumber: Int, -- relative number of week, 0 (zero) means current
 
   -- form
   amount : String
@@ -33,7 +34,7 @@ type alias BudgetId = RecordId
 
 initialModel : Model
 initialModel =
-  Model BBL.initialModel [] 2 ""
+  Model BBL.initialModel [] 2 0 ""
 
 -- UPDATE
 type Msg
@@ -116,7 +117,7 @@ update user msg model =
 
     -- loading and displaying the list
     RequestList ->
-      (model, getExpenses user)
+      (model, getExpenses user model.weekNumber)
 
     UpdateList expensesResult ->
       ({ model | expenses = resultToList expensesResult}, Cmd.none)
@@ -200,9 +201,9 @@ view model =
 
 
 -- EFFECTS
-getExpenses : User -> Cmd Msg
-getExpenses user =
-  Http.get decodeExpenses (expensesUrl user)
+getExpenses : User -> Int -> Cmd Msg
+getExpenses user weekNumber =
+  Http.get decodeExpenses (expensesUrl user weekNumber)
     |> Task.toResult
     |> Task.perform UpdateList UpdateList
 
@@ -232,9 +233,12 @@ deleteExpense user expenseId =
     |> Task.perform UpdateRemoved UpdateRemoved
 
 
-expensesUrl : User -> String
-expensesUrl user =
-  Http.url (user.apiBaseUrl ++ "expenses") (authParams user)
+expensesUrl : User -> Int -> String
+expensesUrl user weekNumber =
+  let
+    params = ("week", toString weekNumber)::(authParams user)
+  in
+    Http.url (user.apiBaseUrl ++ "expenses") params
 
 
 expenseUrl : User -> BudgetId -> String
