@@ -208,7 +208,7 @@ weekHeader model total =
     div [ class "col-12 push-2-tablet push-3-desktop push-3-hd col-8-tablet col-6-desktop col-5-hd" ] [
       ul [ class "list-inline" ] [
         li [ ] [ button [ class "left button", onClick LoadPreviousWeek ] [ text "<<" ] ],
-        li [ ] [ button [ class "left button strong ml05" ] [ text (weekName ++ " - " ++ total)] ],
+        li [ ] [ button [ class "left button week-header ml05" ] [ text (weekName ++ " - " ++ total)] ],
         li [ ] [ button [ class "left button ml05", onClick LoadNextWeek ] [ text ">>" ] ]
       ]
     ]
