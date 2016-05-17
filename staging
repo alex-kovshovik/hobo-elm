@@ -5,7 +5,7 @@ npm run build
 
 echo
 echo "*** DEPLOYING FILES *****************************************************************"
-rsync -zvhd -e "ssh -p 3422" dist/* app@192.241.209.22:/srv/www/hobo-elm-staging --delete
+rsync -zvhdr -e "ssh -p 3422" dist/* app@192.241.209.22:/srv/www/hobo-elm-staging --delete
 
 echo
 echo "*** DONE ***"
