@@ -8,6 +8,7 @@ import Http
 import Json.Decode as Json exposing((:=))
 
 import Records exposing (Budget, RecordId)
+import Messages.BudgetButtonList exposing(..)
 import Components.BudgetButton as BudgetButton
 import Components.Login exposing (User)
 import Utils.Parsers exposing (resultToList)
@@ -25,12 +26,6 @@ initialModel =
 
 
 -- UPDATE
-type Msg
-  = Toggle RecordId
-  | Request
-  | DisplayLoaded (Result Http.Error (List Budget))
-
-
 update : User -> Msg -> Model -> (Model, Cmd Msg)
 update user msg model =
   case msg of

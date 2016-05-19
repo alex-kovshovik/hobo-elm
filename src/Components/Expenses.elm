@@ -4,17 +4,16 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Html.App exposing(map)
-import Task
-import Http
-import HttpBuilder exposing (..)
-import Json.Decode as Json exposing((:=))
-import Json.Encode
 import Date
 
-import Records exposing (Expense, Budget, RecordId)
 import Components.BudgetButtonList as BBL
 import Components.Login exposing (User)
 import Components.Amount as Amount
+
+import Records exposing (Expense, Budget, RecordId, BudgetId)
+import Messages.Expenses exposing(..)
+
+import Services.Expenses exposing(..)
 
 import Utils.Numbers exposing (toFloatPoh, formatAmount)
 import Utils.Parsers exposing (resultToList, resultToObject)
@@ -30,32 +29,11 @@ type alias Model = {
   amount : String
 }
 
-type alias BudgetId = RecordId
-
 initialModel : Model
 initialModel =
   Model BBL.initialModel [] 2 0 ""
 
 -- UPDATE
-type Msg
-  = AmountInput String
-  | BudgetList BBL.Msg
-  | AmountView RecordId Amount.Msg
-
-  -- adding/removing expenses
-  | RequestAdd
-  | RequestRemove Expense
-  | UpdateAdded (Result (Error Expense) (Response Expense))
-  | UpdateRemoved (Result (Error Expense) (Response Expense))
-  | CancelDelete String
-
-  -- loading and displaying the list
-  | RequestList
-  | UpdateList (Result Http.Error (List Expense))
-
-  -- navigating between weeks
-  | LoadPreviousWeek
-  | LoadNextWeek
 
 update : User -> Msg -> Model -> (Model, Cmd Msg)
 update user msg model =
@@ -72,13 +50,11 @@ update user msg model =
     AmountView expenseId msg ->
       let
         updateFunc expenseId expense =
-          if expenseId == expense.id then Amount.update msg expense else expense
+          if expenseId == expense.id then Amount.update user msg expense else (expense, Cmd.none)
 
-        expenses = List.map (updateFunc expenseId) model.expenses
-
-        fx = if msg == Amount.Delete then deleteExpense user expenseId else Cmd.none
+        expensesFx = List.unzip (List.map (updateFunc expenseId) model.expenses)
       in
-        ({ model | expenses = expenses }, fx)
+        ({ model | expenses = fst expensesFx }, Cmd.batch (snd expensesFx))
 
     -- adding/removing expenses
     RequestAdd ->
@@ -238,98 +214,3 @@ view model =
         viewExpenseList expenses totalString
       ]
     ]
-
-
--- EFFECTS
-getExpenses : User -> Int -> Cmd Msg
-getExpenses user weekNumber =
-  Http.get decodeExpenses (expensesUrl user weekNumber)
-    |> Task.toResult
-    |> Task.perform UpdateList UpdateList
-
-
-addExpense : User -> Expense -> Cmd Msg
-addExpense user expense =
-  let
-    expenseJson = Json.Encode.object [
-      ("expense", Json.Encode.object [
-        ("amount", Json.Encode.float expense.amount)
-      ])
-    ]
-  in
-    post (expenseUrl user expense.budgetId)
-      |> withHeader "Content-Type" "application/json"
-      |> withJsonBody expenseJson
-      |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
-      |> Task.toResult
-      |> Task.perform UpdateAdded UpdateAdded
-
-
-deleteExpense : User -> RecordId -> Cmd Msg
-deleteExpense user expenseId =
-  delete (deleteExpenseUrl user expenseId)
-    |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
-    |> Task.toResult
-    |> Task.perform UpdateRemoved UpdateRemoved
-
-
-expensesUrl : User -> Int -> String
-expensesUrl user weekNumber =
-  let
-    params = ("week", toString weekNumber)::(authParams user)
-  in
-    Http.url (user.apiBaseUrl ++ "expenses") params
-
-
-expenseUrl : User -> BudgetId -> String
-expenseUrl user budgetId =
-  let
-    baseUrl = user.apiBaseUrl ++ "budgets/" ++ (toString budgetId) ++ "/expenses"
-  in
-    Http.url baseUrl (authParams user)
-
-deleteExpenseUrl : User -> RecordId -> String
-deleteExpenseUrl user expenseId =
-  let
-    baseUrl = user.apiBaseUrl ++ "expenses/" ++ (toString expenseId)
-  in
-    Http.url baseUrl (authParams user)
-
-
-authParams : User -> List (String, String)
-authParams user =
-  [ ("user_token", user.token),
-    ("user_email", user.email) ]
-
-
--- DECODERS
-decodeExpenses : Json.Decoder (List Expense)
-decodeExpenses =
-  Json.at ["expenses"] (Json.list decodeExpenseFields)
-
-
-decodeExpense : Json.Decoder Expense
-decodeExpense =
-  Json.at ["expense"] decodeExpenseFields
-
-
-decodeExpenseFields : Json.Decoder Expense
-decodeExpenseFields =
-  Json.object6 convertDecoding
-    ( "id"              := Json.int )
-    ( "budget_id"       := Json.int )
-    ( "budget_name"     := Json.string )
-    ( "created_by_name" := Json.string )
-    ( "amount"          := Json.string )
-    ( "created_at"      := Json.string )
-
-
-convertDecoding : RecordId -> RecordId -> String -> String -> String -> String -> Expense
-convertDecoding id budgetId budgetName createdByName amount createdAtString  =
-  let
-    dateResult = Date.fromString createdAtString
-    createdAt = case dateResult of
-                  Ok date -> date
-                  Err error -> Date.fromTime 0
-  in
-    Expense id budgetId budgetName createdByName (toFloatPoh amount) "" createdAt False

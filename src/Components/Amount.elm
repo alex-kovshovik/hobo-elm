@@ -6,23 +6,25 @@ import Html.Events exposing (onWithOptions, Options)
 import Json.Decode as Json
 
 import Records exposing (Expense)
+import Components.Login exposing (User)
+import Messages.Amount exposing (..)
+import Messages.Expenses
+import Services.Expenses exposing(deleteExpense)
 
 import Utils.Numbers exposing (formatAmount)
-
-type Msg = Click | Delete
 
 onClick : Msg -> Attribute Msg
 onClick msg =
   onWithOptions "click" (Options True True) (Json.succeed msg)
 
-update : Msg -> Expense -> Expense
-update msg expense =
+update : User -> Msg -> Expense -> (Expense, Cmd Messages.Expenses.Msg)
+update user msg expense =
   case msg of
     Click ->
-      { expense | clicked = not expense.clicked }
+      ({ expense | clicked = not expense.clicked }, Cmd.none)
 
     Delete ->
-      expense
+      (expense, deleteExpense user expense.id)
 
 view : Expense -> Html Msg
 view expense =
