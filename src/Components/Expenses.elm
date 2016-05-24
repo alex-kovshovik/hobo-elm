@@ -165,7 +165,7 @@ viewExpenseForm model =
                 onInput AmountInput ] [ ]
       ],
       div [ class "col-4" ] [
-        button [ class "button", onClick RequestAdd, disabled (model.buttons.currentBudgetId == Nothing || model.amount == "") ] [ text "Add" ]
+        button [ class "button week-button", onClick RequestAdd, disabled (model.buttons.currentBudgetId == Nothing || model.amount == "") ] [ text "Add" ]
       ]
     ]
   ]
@@ -181,12 +181,18 @@ weekHeader model total =
     weekName = if model.weekNumber == 0 then "This week" else
                if model.weekNumber == -1 then "Last week" else
                (toString -model.weekNumber) ++ " weeks ago"
+
+    rightDisabledClass = if model.weekNumber == 0 then " disabled" else ""
   in
-    div [ class "col-12 push-2-tablet push-3-desktop push-3-hd col-8-tablet col-6-desktop col-5-hd" ] [
-      ul [ class "list-inline" ] [
-        li [ ] [ button [ class "left button", onClick LoadPreviousWeek ] [ text "<<" ] ],
-        li [ ] [ button [ class "left button week-header ml05" ] [ text (weekName ++ " - " ++ total)] ],
-        li [ ] [ button [ class "left button ml05", onClick LoadNextWeek ] [ text ">>" ] ]
+    div [ class "clear" ] [
+      div [ class "col-3 col-1-hd" ] [
+        button [ class "button week-button", onClick LoadPreviousWeek ] [ text "<<" ]
+      ],
+      div [ class "col-6 col-10-hd" ] [
+        div [ class "week-header" ] [ text (weekName ++ " - " ++ total)]
+      ],
+      div [ class "col-3 col-1-hd" ] [
+        button [ class ("button week-button" ++ rightDisabledClass), onClick LoadNextWeek ] [ text ">>" ]
       ]
     ]
 
