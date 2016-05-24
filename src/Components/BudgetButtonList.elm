@@ -7,11 +7,12 @@ import Task
 import Http
 import Json.Decode as Json exposing((:=))
 
-import Records exposing (Budget, RecordId)
+import Records exposing (Budget, Expense, RecordId)
 import Messages.BudgetButtonList exposing(..)
 import Components.BudgetButton as BudgetButton
 import Components.Login exposing (User)
 import Utils.Parsers exposing (resultToList)
+import Utils.Numbers exposing (toFloatPoh)
 
 
 -- MODEL
@@ -45,16 +46,16 @@ update user msg model =
 
 
 -- VIEW
-viewBudgetButton: Model -> Budget -> Html Msg
-viewBudgetButton model budget =
+viewBudgetButton: List Expense -> Model -> Budget -> Html Msg
+viewBudgetButton expenses model budget =
   li [ ] [
-    BudgetButton.view model.currentBudgetId (onClick (Toggle budget.id)) budget
+    BudgetButton.view model.currentBudgetId (onClick (Toggle budget.id)) budget expenses
   ]
 
 
-view : Model -> Html Msg
-view model =
-  ul [ class "list-unstyled list-inline" ] (List.map (viewBudgetButton model) model.budgets)
+view : List Expense -> Model -> Html Msg
+view expenses model =
+  ul [ class "list-unstyled list-inline" ] (List.map (viewBudgetButton expenses model) model.budgets)
 
 
 -- EFFECTS
@@ -69,7 +70,6 @@ getBudgets user =
 budgetsUrl : User -> String
 budgetsUrl user =
   Http.url (user.apiBaseUrl ++ "budgets")
-  -- Http.url "http://api.hoboapp.com/budgets"
     [ ("user_token", user.token),
       ("user_email", user.email) ]
 
@@ -81,6 +81,12 @@ decodeBudgets =
 
 decodeBudget : Json.Decoder Budget
 decodeBudget =
-  Json.object2 Budget
+  Json.object3 convertDecoding
     ( "id"     := Json.int )
     ( "name"   := Json.string )
+    ( "amount" := Json.string )
+
+
+convertDecoding : RecordId -> String -> String -> Budget
+convertDecoding id name amount =
+  Budget id name (toFloatPoh amount)

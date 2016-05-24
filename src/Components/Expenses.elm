@@ -169,9 +169,9 @@ viewExpenseForm model =
     ]
   ]
 
-viewButtonlist : Model -> Html Msg
-viewButtonlist model =
-  map BudgetList (BBL.view model.buttons)
+viewButtonlist : List Expense -> Model -> Html Msg
+viewButtonlist expenses model =
+  map BudgetList (BBL.view expenses model.buttons)
 
 
 weekHeader : Model -> String -> Html Msg
@@ -195,22 +195,22 @@ view model =
     filter expense =
       Just expense.budgetId == model.buttons.currentBudgetId || model.buttons.currentBudgetId == Nothing
     expenses = List.filter filter model.expenses
-    total = List.foldl (\ex sum -> sum + ex.amount) 0.0 expenses
-    totalString = formatAmount total
+    expensesTotal = getTotal expenses |> formatAmount
+
   in
     div [ onClick (CancelDelete "delete") ] [
       div [ class "clear" ] [
         div [ class "col-12" ] [
-          viewButtonlist model,
+          viewButtonlist model.expenses model,
           viewExpenseForm model
         ]
       ],
 
       div [ class "clear" ] [
-        weekHeader model totalString
+        weekHeader model expensesTotal
       ],
 
       div [ class "clear" ] [
-        viewExpenseList expenses totalString
+        viewExpenseList expenses expensesTotal
       ]
     ]

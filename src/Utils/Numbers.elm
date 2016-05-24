@@ -10,3 +10,7 @@ toFloatPoh value =
 formatAmount : Float -> String
 formatAmount amount =
   Numeral.format "$0,0.00" amount
+
+formatAmountRound : Float -> String
+formatAmountRound amount =
+  Numeral.format "$0" amount

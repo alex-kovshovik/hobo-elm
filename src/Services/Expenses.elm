@@ -14,6 +14,10 @@ import Utils.Numbers exposing (toFloatPoh, formatAmount)
 import Messages.Expenses exposing (..)
 
 
+getTotal : List Expense -> Float
+getTotal expenses =
+  List.foldl (\ex sum -> sum + ex.amount) 0.0 expenses
+
 getExpenses : User -> Int -> Cmd Msg
 getExpenses user weekNumber =
   Http.get decodeExpenses (expensesUrl user weekNumber)

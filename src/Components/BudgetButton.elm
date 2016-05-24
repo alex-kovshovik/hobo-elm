@@ -1,21 +1,47 @@
 module Components.BudgetButton exposing(..)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing(..)
+import Html.Attributes exposing(..)
 import String
 
-import Records exposing (Budget, RecordId)
+import Utils.Numbers exposing (formatAmountRound)
+import Services.Expenses exposing(getTotal)
+import Records exposing (Budget, Expense, RecordId)
 
 -- VIEW
 buttonClass : Maybe RecordId -> Budget -> Attribute a
 buttonClass currentBudgetId budget =
   let
-    baseClasses = [ "button", "budget-button" ]
+    baseClasses = [ "bb" ]
     classes = if currentBudgetId == Just budget.id then "selected" :: baseClasses else baseClasses
   in
     class (String.join " " classes)
 
+shitOrOkClass : Float -> Float -> String -> Attribute a
+shitOrOkClass budgetExpenses maxBudget baseClass =
+  let
+    baseClasses = [ baseClass ]
+    classes = if budgetExpenses > maxBudget then "shit" :: baseClasses else "ok" :: baseClasses
+  in
+    class (String.join " " classes)
 
-view : Maybe RecordId -> Attribute a -> Budget -> Html a
-view currentBudgetId clicker budget =
-  button [ buttonClass currentBudgetId budget, clicker ] [ text budget.name ]
+view : Maybe RecordId -> Attribute a -> Budget -> List Expense -> Html a
+view currentBudgetId clicker budget allExpenses =
+  let
+    expenses = List.filter (\e -> e.budgetId == budget.id) allExpenses
+    totalExpenses = getTotal expenses
+
+    shitOrOk = shitOrOkClass totalExpenses budget.amount -- partial funtion execution
+  in
+    div [ buttonClass currentBudgetId budget, clicker ] [
+      div [ class "bb-title" ] [ text budget.name ],
+      div [ class "bb-prog-container" ] [
+        div [ shitOrOk "bb-prog-text" ] [
+          b [ ] [ text (formatAmountRound totalExpenses) ],
+          text (" / " ++ (formatAmountRound budget.amount))
+        ],
+        div [ class "bb-prog-shitline", style [("width", "80%")] ] [ ],
+        div [ shitOrOk "bb-prog-left",  style [("width", "75%")] ] [ ],
+        div [ shitOrOk "bb-prog-right", style [("width", "25%")] ] [ ]
+      ]
+    ]

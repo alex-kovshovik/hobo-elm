@@ -44,21 +44,102 @@ button:disabled {
  * Budget buttons
  */
 
-button:focus {
-  outline:0;
-}
+ div.bb {
+   border: 1px solid #d7d7d7;
+   border-radius: 3px;
+   width: 82px;
+   height: 42px;
+   padding: 0;
+   margin-left: 5px;
+   margin-top: 5px;
+   float: left;
+   cursor: pointer;
 
-button.budget-button {
-  /*background-color: white;*/
-  margin-right: 5px;
-  margin-bottom: 5px;
-  padding: 5px;
-}
+   -webkit-touch-callout: none; /* iOS Safari */
+   -webkit-user-select: none;   /* Chrome/Safari/Opera */
+   -khtml-user-select: none;    /* Konqueror */
+   -moz-user-select: none;      /* Firefox */
+   -ms-user-select: none;       /* Internet Explorer/Edge */
+   user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+ }
 
-button.budget-button.selected {
-  background-color: #8bc34a;
-  color: #fff;
-}
+ div.bb.selected {
+   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+   border: 1px solid #8bc34a;
+ }
+
+ div.bb-title {
+   padding: 2px;
+   text-align: center;
+   font-weight: bold;
+ }
+
+ div.bb-prog-container {
+   height: 14px;
+   width: 100%;
+   position: relative;
+ }
+
+ div.bb-prog-text {
+   font-size: 0.6em;
+   position: absolute;
+   top: -3px;
+   z-index: 10;
+   width: 100%;
+   padding-left: 2px;
+ }
+
+ div.bb-prog-text.right {
+   text-align: right;
+ }
+
+ div.bb-prog-text.ok {
+   color: #358000;
+ }
+
+ div.bb-prog-text.shit {
+   color: #802800;
+ }
+
+ div.bb-prog-shitline {
+   height: 14px;
+   position: absolute;
+   top: 0;
+   left: 0;
+   z-index: 15;
+   border-right: 1px solid black;
+ }
+
+ @mixin bb-prog-base {
+   float: left;
+   height: 100%;
+   position: relative;
+ }
+
+ div.bb-prog-left {
+   @include bb-prog-base;
+ }
+
+ div.bb-prog-right {
+   @include bb-prog-base;
+ }
+
+ div.bb-prog-left.ok {
+   background-color: #A3E654;
+ }
+
+ div.bb-prog-right.ok {
+   background-color: #E3F7D2;
+ }
+
+ div.bb-prog-left.shit {
+   background-color: #FE8160;
+ }
+
+ div.bb-prog-right.shit {
+   background-color: #F7D8D2;
+ }
 
 /**
  * Expenses list
