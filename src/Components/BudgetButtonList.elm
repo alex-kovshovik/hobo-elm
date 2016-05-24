@@ -45,16 +45,16 @@ update user msg model =
 
 
 -- VIEW
-viewBudgetButton: User -> List Expense -> Model -> Budget -> Html Msg
-viewBudgetButton user expenses model budget =
+viewBudgetButton: User -> Int -> List Expense -> Model -> Budget -> Html Msg
+viewBudgetButton user weekNumber expenses model budget =
   div [ class "col-3 bb-cell" ] [
-    BudgetButton.view user model.currentBudgetId (onClick (Toggle budget.id)) budget expenses
+    BudgetButton.view user weekNumber model.currentBudgetId (onClick (Toggle budget.id)) budget expenses
   ]
 
 
-view : User -> List Expense -> Model -> Html Msg
-view user expenses model =
-  div [ class "clear" ] (List.map (viewBudgetButton user expenses model) model.budgets)
+view : User -> Int -> List Expense -> Model -> Html Msg
+view user weekNumber expenses model =
+  div [ class "clear" ] (List.map (viewBudgetButton user weekNumber expenses model) model.budgets)
 
 
 -- EFFECTS

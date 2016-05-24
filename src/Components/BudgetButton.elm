@@ -25,15 +25,15 @@ shitOrOkClass spentFraction shitlineFraction baseClass =
   in
     class (String.join " " classes)
 
-view : User -> Maybe RecordId -> Attribute a -> Budget -> List Expense -> Html a
-view user currentBudgetId clicker budget allExpenses =
+view : User -> Int -> Maybe RecordId -> Attribute a -> Budget -> List Expense -> Html a
+view user weekNumber currentBudgetId clicker budget allExpenses =
   let
     expenses = List.filter (\e -> e.budgetId == budget.id) allExpenses
     totalExpenses = getTotal expenses
 
     leftFraction = totalExpenses / budget.amount
     rightFraction = 1.0 - leftFraction
-    shitlineFraction = user.weekFraction
+    shitlineFraction = if weekNumber == 0 then user.weekFraction else 1.0
 
     shitOrOk = shitOrOkClass leftFraction shitlineFraction -- partial funtion execution
   in

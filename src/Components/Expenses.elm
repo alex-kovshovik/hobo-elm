@@ -172,7 +172,7 @@ viewExpenseForm model =
 
 viewButtonlist : User -> List Expense -> Model -> Html Msg
 viewButtonlist user expenses model =
-  map BudgetList (BBL.view user expenses model.buttons)
+  map BudgetList (BBL.view user model.weekNumber expenses model.buttons)
 
 
 weekHeader : Model -> String -> Html Msg
