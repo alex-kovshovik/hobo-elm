@@ -78,7 +78,7 @@ update msg model =
 -- VIEW
 view : Model -> Html Msg
 view model =
-  div [ class "container"] [
+  div [ class "container-full"] [
     div [ class "clear col-12 mt1" ] [
       text ("Welcome " ++ model.user.email)
     ],

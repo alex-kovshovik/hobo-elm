@@ -47,11 +47,11 @@ button:disabled {
  div.bb {
    border: 1px solid #d7d7d7;
    border-radius: 3px;
-   width: 82px;
+   width: 76px;
    height: 42px;
    padding: 0;
-   margin-left: 5px;
-   margin-top: 5px;
+   margin-left: 3px;
+   margin-top: 3px;
    float: left;
    cursor: pointer;
 
@@ -73,12 +73,14 @@ button:disabled {
    padding: 2px;
    text-align: center;
    font-weight: bold;
+   background-color: #f3f3f3;
  }
 
  div.bb-prog-container {
    height: 14px;
    width: 100%;
    position: relative;
+   border-top: 1px solid #d7d7d7;
  }
 
  div.bb-prog-text {
@@ -103,12 +105,12 @@ button:disabled {
  }
 
  div.bb-prog-shitline {
-   height: 14px;
+   height: 13px;
    position: absolute;
    top: 0;
    left: 0;
    z-index: 15;
-   border-right: 1px solid black;
+   border-right: 1px solid #d7d7d7;
  }
 
  @mixin bb-prog-base {

@@ -31,6 +31,11 @@ view currentBudgetId clicker budget allExpenses =
     expenses = List.filter (\e -> e.budgetId == budget.id) allExpenses
     totalExpenses = getTotal expenses
 
+    leftPercentActual = 100.0 * totalExpenses / budget.amount
+    leftPercent = if leftPercentActual > 100.0 then 100.0 else leftPercentActual
+
+    rightPercent = 100.0 - leftPercent
+
     shitOrOk = shitOrOkClass totalExpenses budget.amount -- partial funtion execution
   in
     div [ buttonClass currentBudgetId budget, clicker ] [
@@ -41,7 +46,7 @@ view currentBudgetId clicker budget allExpenses =
           text (" / " ++ (formatAmountRound budget.amount))
         ],
         div [ class "bb-prog-shitline", style [("width", "80%")] ] [ ],
-        div [ shitOrOk "bb-prog-left",  style [("width", "75%")] ] [ ],
-        div [ shitOrOk "bb-prog-right", style [("width", "25%")] ] [ ]
+        div [ shitOrOk "bb-prog-left",  style [("width", (leftPercent |> toString) ++ "%")] ] [ ],
+        div [ shitOrOk "bb-prog-right", style [("width", (rightPercent |> toString) ++ "%")] ] [ ]
       ]
     ]
