@@ -18,10 +18,10 @@ buttonClass currentBudgetId budget =
     class (String.join " " classes)
 
 shitOrOkClass : Float -> Float -> String -> Attribute a
-shitOrOkClass budgetExpenses maxBudget baseClass =
+shitOrOkClass spentFraction shitlineFraction baseClass =
   let
     baseClasses = [ baseClass ]
-    classes = if budgetExpenses > maxBudget then "shit" :: baseClasses else "ok" :: baseClasses
+    classes = if spentFraction > shitlineFraction then "shit" :: baseClasses else "ok" :: baseClasses
   in
     class (String.join " " classes)
 
@@ -31,12 +31,11 @@ view user currentBudgetId clicker budget allExpenses =
     expenses = List.filter (\e -> e.budgetId == budget.id) allExpenses
     totalExpenses = getTotal expenses
 
-    leftPercentActual = 100.0 * totalExpenses / budget.amount
-    leftPercent = if leftPercentActual > 100.0 then 100.0 else leftPercentActual
+    leftFraction = totalExpenses / budget.amount
+    rightFraction = 1.0 - leftFraction
+    shitlineFraction = user.weekFraction
 
-    rightPercent = 100.0 - leftPercent
-
-    shitOrOk = shitOrOkClass totalExpenses budget.amount -- partial funtion execution
+    shitOrOk = shitOrOkClass leftFraction shitlineFraction -- partial funtion execution
   in
     div [ buttonClass currentBudgetId budget, clicker ] [
       div [ class "bb-title" ] [ text budget.name ],
@@ -45,8 +44,17 @@ view user currentBudgetId clicker budget allExpenses =
           b [ ] [ text (formatAmountRound totalExpenses) ],
           text (" / " ++ (formatAmountRound budget.amount))
         ],
-        div [ class "bb-prog-shitline", style [("width", "80%")] ] [ ],
-        div [ shitOrOk "bb-prog-left",  style [("width", (leftPercent |> toString) ++ "%")] ] [ ],
-        div [ shitOrOk "bb-prog-right", style [("width", (rightPercent |> toString) ++ "%")] ] [ ]
+        div [ class "bb-prog-shitline", style [("width", (shitlineFraction |> toPercentString))] ] [ ],
+        div [ shitOrOk "bb-prog-left",  style [("width", (leftFraction |> toPercentString))] ] [ ],
+        div [ shitOrOk "bb-prog-right", style [("width", (rightFraction |> toPercentString))] ] [ ]
       ]
     ]
+
+
+toPercentString : Float -> String
+toPercentString fraction =
+  let
+    cappedFraction = if fraction > 1.0 then 1.0 else
+                     if fraction < 0.0 then 0.0 else fraction
+  in
+    (100.0 * cappedFraction |> toString) ++ "%"
