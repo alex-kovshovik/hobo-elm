@@ -153,19 +153,21 @@ viewExpenseList filteredExpenses totalString =
 
 viewExpenseForm : Model -> Html Msg
 viewExpenseForm model =
-  div [ class "field-group clear row" ] [
-    div [ class "col-9" ] [
-      input [ class "field",
-              type' "number",
-              id "amount",
-              name "amount",
-              value model.amount,
-              placeholder "Amount",
-              autocomplete False,
-              onInput AmountInput ] [ ]
-    ],
-    div [ class "col-2" ] [
-      button [ class "button", onClick RequestAdd, disabled (model.buttons.currentBudgetId == Nothing || model.amount == "") ] [ text "Add" ]
+  div [ class "clear" ] [
+    div [ class "field-group" ] [
+      div [ class "col-8" ] [
+        input [ class "field",
+                type' "number",
+                id "amount",
+                name "amount",
+                value model.amount,
+                placeholder "Amount",
+                autocomplete False,
+                onInput AmountInput ] [ ]
+      ],
+      div [ class "col-4" ] [
+        button [ class "button", onClick RequestAdd, disabled (model.buttons.currentBudgetId == Nothing || model.amount == "") ] [ text "Add" ]
+      ]
     ]
   ]
 
@@ -199,12 +201,8 @@ view model =
 
   in
     div [ onClick (CancelDelete "delete") ] [
-      div [ class "clear" ] [
-        div [ class "col-12" ] [
-          viewButtonlist model.expenses model,
-          viewExpenseForm model
-        ]
-      ],
+      viewButtonlist model.expenses model,
+      viewExpenseForm model,
 
       div [ class "clear" ] [
         weekHeader model expensesTotal

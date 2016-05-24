@@ -48,14 +48,14 @@ update user msg model =
 -- VIEW
 viewBudgetButton: List Expense -> Model -> Budget -> Html Msg
 viewBudgetButton expenses model budget =
-  li [ ] [
+  div [ class "col-3 bb-cell" ] [
     BudgetButton.view model.currentBudgetId (onClick (Toggle budget.id)) budget expenses
   ]
 
 
 view : List Expense -> Model -> Html Msg
 view expenses model =
-  ul [ class "list-unstyled list-inline" ] (List.map (viewBudgetButton expenses model) model.budgets)
+  div [ class "clear" ] (List.map (viewBudgetButton expenses model) model.budgets)
 
 
 -- EFFECTS
