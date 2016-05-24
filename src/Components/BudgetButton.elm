@@ -34,13 +34,14 @@ view user weekNumber currentBudgetId clicker budget allExpenses =
     leftFraction = totalExpenses / budget.amount
     rightFraction = 1.0 - leftFraction
     shitlineFraction = if weekNumber == 0 then user.weekFraction else 1.0
+    progTextRight = if shitlineFraction < 0.5 then " right" else ""
 
     shitOrOk = shitOrOkClass leftFraction shitlineFraction -- partial funtion execution
   in
     div [ buttonClass currentBudgetId budget, clicker ] [
       div [ class "bb-title" ] [ text budget.name ],
       div [ class "bb-prog-container" ] [
-        div [ shitOrOk "bb-prog-text" ] [
+        div [ shitOrOk ("bb-prog-text" ++ progTextRight) ] [
           b [ ] [ text (formatAmountRound totalExpenses) ],
           text (" / " ++ (formatAmountRound budget.amount))
         ],
