@@ -5,8 +5,7 @@ import Html.Attributes exposing(class)
 import Html.Events exposing (onWithOptions, Options)
 import Json.Decode as Json
 
-import Records exposing (Expense)
-import Components.Login exposing (User)
+import Records exposing (User, Expense)
 import Messages.Amount exposing (..)
 import Messages.Expenses
 import Services.Expenses exposing(deleteExpense)

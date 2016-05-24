@@ -7,10 +7,9 @@ import Html.App exposing(map)
 import Date
 
 import Components.BudgetButtonList as BBL
-import Components.Login exposing (User)
 import Components.Amount as Amount
 
-import Records exposing (Expense, Budget, RecordId, BudgetId)
+import Records exposing (User, Expense, Budget, RecordId, BudgetId)
 import Messages.Expenses exposing(..)
 
 import Services.Expenses exposing(..)
@@ -171,9 +170,9 @@ viewExpenseForm model =
     ]
   ]
 
-viewButtonlist : List Expense -> Model -> Html Msg
-viewButtonlist expenses model =
-  map BudgetList (BBL.view expenses model.buttons)
+viewButtonlist : User -> List Expense -> Model -> Html Msg
+viewButtonlist user expenses model =
+  map BudgetList (BBL.view user expenses model.buttons)
 
 
 weekHeader : Model -> String -> Html Msg
@@ -191,8 +190,8 @@ weekHeader model total =
       ]
     ]
 
-view : Model -> Html Msg
-view model =
+view : User -> Model -> Html Msg
+view user model =
   let
     filter expense =
       Just expense.budgetId == model.buttons.currentBudgetId || model.buttons.currentBudgetId == Nothing
@@ -201,7 +200,7 @@ view model =
 
   in
     div [ onClick (CancelDelete "delete") ] [
-      viewButtonlist model.expenses model,
+      viewButtonlist user model.expenses model,
       viewExpenseForm model,
 
       div [ class "clear" ] [

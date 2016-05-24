@@ -7,10 +7,9 @@ import Task
 import Http
 import Json.Decode as Json exposing((:=))
 
-import Records exposing (Budget, Expense, RecordId)
+import Records exposing (User, Budget, Expense, RecordId)
 import Messages.BudgetButtonList exposing(..)
 import Components.BudgetButton as BudgetButton
-import Components.Login exposing (User)
 import Utils.Parsers exposing (resultToList)
 import Utils.Numbers exposing (toFloatPoh)
 
@@ -46,16 +45,16 @@ update user msg model =
 
 
 -- VIEW
-viewBudgetButton: List Expense -> Model -> Budget -> Html Msg
-viewBudgetButton expenses model budget =
+viewBudgetButton: User -> List Expense -> Model -> Budget -> Html Msg
+viewBudgetButton user expenses model budget =
   div [ class "col-3 bb-cell" ] [
-    BudgetButton.view model.currentBudgetId (onClick (Toggle budget.id)) budget expenses
+    BudgetButton.view user model.currentBudgetId (onClick (Toggle budget.id)) budget expenses
   ]
 
 
-view : List Expense -> Model -> Html Msg
-view expenses model =
-  div [ class "clear" ] (List.map (viewBudgetButton expenses model) model.budgets)
+view : User -> List Expense -> Model -> Html Msg
+view user expenses model =
+  div [ class "clear" ] (List.map (viewBudgetButton user expenses model) model.budgets)
 
 
 -- EFFECTS

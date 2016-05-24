@@ -1,5 +1,5 @@
 port module Ports exposing(userData)
 
-import Components.Login exposing (User)
+import Records exposing (HoboAuth)
 
-port userData : (User -> msg) -> Sub msg
+port userData : (HoboAuth -> msg) -> Sub msg

@@ -6,7 +6,7 @@ import String
 
 import Utils.Numbers exposing (formatAmountRound)
 import Services.Expenses exposing(getTotal)
-import Records exposing (Budget, Expense, RecordId)
+import Records exposing (User, Budget, Expense, RecordId)
 
 -- VIEW
 buttonClass : Maybe RecordId -> Budget -> Attribute a
@@ -25,8 +25,8 @@ shitOrOkClass budgetExpenses maxBudget baseClass =
   in
     class (String.join " " classes)
 
-view : Maybe RecordId -> Attribute a -> Budget -> List Expense -> Html a
-view currentBudgetId clicker budget allExpenses =
+view : User -> Maybe RecordId -> Attribute a -> Budget -> List Expense -> Html a
+view user currentBudgetId clicker budget allExpenses =
   let
     expenses = List.filter (\e -> e.budgetId == budget.id) allExpenses
     totalExpenses = getTotal expenses

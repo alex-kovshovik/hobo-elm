@@ -7,8 +7,7 @@ import Json.Decode as Json exposing((:=))
 import Json.Encode
 import Date
 
-import Records exposing (Expense, Budget, RecordId, BudgetId)
-import Components.Login exposing (User)
+import Records exposing (User, Expense, Budget, RecordId, BudgetId)
 
 import Utils.Numbers exposing (toFloatPoh, formatAmount)
 import Messages.Expenses exposing (..)
@@ -17,6 +16,7 @@ import Messages.Expenses exposing (..)
 getTotal : List Expense -> Float
 getTotal expenses =
   List.foldl (\ex sum -> sum + ex.amount) 0.0 expenses
+
 
 getExpenses : User -> Int -> Cmd Msg
 getExpenses user weekNumber =
@@ -64,6 +64,7 @@ expenseUrl user budgetId =
     baseUrl = user.apiBaseUrl ++ "budgets/" ++ (toString budgetId) ++ "/expenses"
   in
     Http.url baseUrl (authParams user)
+
 
 deleteExpenseUrl : User -> RecordId -> String
 deleteExpenseUrl user expenseId =
