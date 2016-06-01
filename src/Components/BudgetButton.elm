@@ -17,11 +17,11 @@ buttonClass currentBudgetId budget =
   in
     class (String.join " " classes)
 
-shitOrOkClass : Float -> Float -> String -> Attribute a
-shitOrOkClass spentFraction shitlineFraction baseClass =
+shitOrOkClass : Float -> String -> Attribute a
+shitOrOkClass spentFraction baseClass =
   let
     baseClasses = [ baseClass ]
-    classes = if spentFraction > shitlineFraction then "shit" :: baseClasses else "ok" :: baseClasses
+    classes = if spentFraction > 1.0 then "shit" :: baseClasses else "ok" :: baseClasses
   in
     class (String.join " " classes)
 
@@ -31,12 +31,12 @@ view user weekNumber currentBudgetId clicker budget allExpenses =
     expenses = List.filter (\e -> e.budgetId == budget.id) allExpenses
     totalExpenses = getTotal expenses
 
-    leftFraction = totalExpenses / budget.amount
-    rightFraction = 1.0 - leftFraction
+    spentFraction = totalExpenses / budget.amount
+    remainFraction = 1.0 - spentFraction
     shitlineFraction = if weekNumber == 0 then user.weekFraction else 1.0
     progTextRight = if shitlineFraction < 0.5 then " right" else ""
 
-    shitOrOk = shitOrOkClass leftFraction shitlineFraction -- partial funtion execution
+    shitOrOk = shitOrOkClass spentFraction -- partial funtion execution
   in
     div [ buttonClass currentBudgetId budget, clicker ] [
       div [ class "bb-title" ] [ text budget.name ],
@@ -46,8 +46,8 @@ view user weekNumber currentBudgetId clicker budget allExpenses =
           text (" / " ++ (formatAmountRound budget.amount))
         ],
         div [ class "bb-prog-shitline", style [("width", (shitlineFraction |> toPercentString))] ] [ ],
-        div [ shitOrOk "bb-prog-left",  style [("width", (leftFraction |> toPercentString))] ] [ ],
-        div [ shitOrOk "bb-prog-right", style [("width", (rightFraction |> toPercentString))] ] [ ]
+        div [ shitOrOk "bb-prog-left",  style [("width", (spentFraction |> toPercentString))] ] [ ],
+        div [ shitOrOk "bb-prog-right", style [("width", (remainFraction |> toPercentString))] ] [ ]
       ]
     ]
 
