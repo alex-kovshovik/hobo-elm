@@ -20,7 +20,12 @@ import Expenses.Rest exposing (getExpenses)
 
 import Utils.Parsers exposing (resultToObject)
 
-import Messages.Main exposing(..)
+type alias CheckData = (Float, String)
+
+type Msg
+  = List Expenses.Types.Msg
+  | UserCheckOk (Result (Error CheckData) (Response CheckData))
+  | UserCheckFail (Result (Error CheckData) (Response CheckData))
 
 
 -- PROGRAM
