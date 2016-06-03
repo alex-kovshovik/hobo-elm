@@ -1,4 +1,4 @@
-module Types exposing(..)
+module Types exposing (..)
 
 type alias RecordId = Int
 

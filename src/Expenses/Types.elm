@@ -6,8 +6,10 @@ import HttpBuilder exposing (Error, Response)
 import Types exposing (..)
 import Budgets.Types as Budgets
 
+type alias ExpenseId = RecordId
+
 type alias Expense = {
-  id : RecordId,
+  id : ExpenseId,
   budgetId: RecordId,
   budgetName: String,
   createdByName: String,
