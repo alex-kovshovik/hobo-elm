@@ -12,19 +12,15 @@ class HoboJs {
   constructor () {
     let hoboAuth = this.getAuth()
 
-    if (!hoboAuth.authenticated) {
+    if (hoboAuth.authenticated) {
+      this.embedElmApp(hoboAuth)
+    } else {
       this.showFacebookLogin()
     }
+  }
 
-    // this.elmApp = Elm.Main.embed(document.getElementById('main'), { userData: hoboAuth })
-    this.elmApp = Elm.Main.embed(document.getElementById('main'))
-
-    if (hoboAuth.authenticated) {
-      // TODO: remove after https://github.com/elm-lang/core/issues/595 is resolved.
-      setTimeout(() => {
-        this.elmApp.ports.userData.send(hoboAuth)
-      }, 1)
-    }
+  embedElmApp (auth) {
+    Elm.Main.embed(document.getElementById('main'), auth)
   }
 
   getAuth () {
@@ -96,12 +92,12 @@ class HoboJs {
   handleRegisterResponse (authData) {
     const auth = this.getAuth()
 
-    auth.email = authData.email
-    auth.token = authData.token
+    auth.email = authData.user.email
+    auth.token = authData.user.authentication_token
     auth.authenticated = true
-    this.setAuth(auth)
 
-    this.elmApp.ports.userData.send(auth)
+    this.setAuth(auth)
+    this.embedElmApp(auth)
     this.hideFacebookLogin()
   }
 

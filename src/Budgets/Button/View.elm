@@ -1,32 +1,18 @@
-module Components.BudgetButton exposing(..)
+module Budgets.Button.View exposing(root)
 
 import Html exposing(..)
 import Html.Attributes exposing(..)
 import String
 
+import Types exposing (..)
+import Budgets.Types exposing (..)
+import Expenses.Types exposing (Expense)
+
 import Utils.Numbers exposing (formatAmountRound)
-import Services.Expenses exposing(getTotal)
-import Records exposing (User, Budget, Expense, RecordId)
+import Utils.Expenses exposing (getTotal)
 
--- VIEW
-buttonClass : Maybe RecordId -> Budget -> Attribute a
-buttonClass currentBudgetId budget =
-  let
-    baseClasses = [ "bb" ]
-    classes = if currentBudgetId == Just budget.id then "selected" :: baseClasses else baseClasses
-  in
-    class (String.join " " classes)
-
-shitOrOkClass : Float -> String -> Attribute a
-shitOrOkClass spentFraction baseClass =
-  let
-    baseClasses = [ baseClass ]
-    classes = if spentFraction > 1.0 then "shit" :: baseClasses else "ok" :: baseClasses
-  in
-    class (String.join " " classes)
-
-view : User -> Int -> Maybe RecordId -> Attribute a -> Budget -> List Expense -> Html a
-view user weekNumber currentBudgetId clicker budget allExpenses =
+root : User -> Int -> Maybe RecordId -> Attribute a -> Budget -> List Expense -> Html a
+root user weekNumber currentBudgetId clicker budget allExpenses =
   let
     expenses = List.filter (\e -> e.budgetId == budget.id) allExpenses
     totalExpenses = getTotal expenses
@@ -50,6 +36,24 @@ view user weekNumber currentBudgetId clicker budget allExpenses =
         div [ shitOrOk "bb-prog-right", style [("width", (remainFraction |> toPercentString))] ] [ ]
       ]
     ]
+
+
+buttonClass : Maybe RecordId -> Budget -> Attribute a
+buttonClass currentBudgetId budget =
+  let
+    baseClasses = [ "bb" ]
+    classes = if currentBudgetId == Just budget.id then "selected" :: baseClasses else baseClasses
+  in
+    class (String.join " " classes)
+
+
+shitOrOkClass : Float -> String -> Attribute a
+shitOrOkClass spentFraction baseClass =
+  let
+    baseClasses = [ baseClass ]
+    classes = if spentFraction > 1.0 then "shit" :: baseClasses else "ok" :: baseClasses
+  in
+    class (String.join " " classes)
 
 
 toPercentString : Float -> String

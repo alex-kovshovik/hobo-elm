@@ -4,93 +4,60 @@ import Html exposing (..)
 import Html.Attributes exposing(..)
 import Html.App as Html exposing(map)
 
-import Navigation
-import Hop exposing (makeUrl, makeUrlFromLocation, matchUrl, setQuery)
-import Hop.Types exposing (Config, Query, Location, PathMatcher, Router)
-import Hop.Matchers exposing (..)
-
 import Http
 import HttpBuilder exposing (..)
 import Task
 import Json.Decode as Json exposing((:=))
 import Json.Encode
 
-import Components.Expenses as Expenses
-import Components.BudgetButtonList exposing (getBudgets)
-import Records exposing (User, HoboAuth)
+import Types exposing (..)
+import Expenses.Types
+import Expenses.State
+import Expenses.View
+
+import Budgets.Rest exposing (getBudgets)
+import Expenses.Rest exposing (getExpenses)
+
 import Utils.Parsers exposing (resultToObject)
 
-import Messages.Expenses
-
-import Services.Expenses exposing (getExpenses)
-import Ports exposing(userData)
-
--- ROUTES
-type Route
-  = Expenses
-  | Expense Int
-  | NotFoundRoute
-
-
-matchers : List (PathMatcher Route)
-matchers =
-  [ match1 Expenses "",
-    match2 Expense "/expenses" int
-  ]
-
-
-routerConfig : Config Route
-routerConfig =
-  { hash = True,
-    basePath = "",
-    matchers = matchers,
-    notFound = NotFoundRoute
-  }
-
-
-urlParser : Navigation.Parser ( Route, Location )
-urlParser =
-    Navigation.makeParser (.href >> matchUrl routerConfig)
-
-
--- MESSAGES
-type Msg
-  = List Messages.Expenses.Msg
-  | Login HoboAuth
-  | UserCheckOk (Result (Error CheckData) (Response CheckData))
-  | UserCheckFail (Result (Error CheckData) (Response CheckData))
-  | NavigateTo String
-  | SetQuery Query
+import Messages.Main exposing(..)
 
 
 -- PROGRAM
-main : Program Never
+main : Program (Maybe HoboAuth)
 main =
-  Navigation.program urlParser {
-      init = init,
-      view = view,
-      update = update,
-      urlUpdate = urlUpdate,
-      subscriptions = subscriptions
-    }
+  Html.programWithFlags {
+    init = init,
+    view = view,
+    update = update,
+    subscriptions = \_ -> Sub.none
+  }
 
 
 -- MODEL
 type alias Model = {
-  data: Expenses.Model,
-  user: User,
-  location: Location,
-  route: Route
+  data: Expenses.Types.Model,
+  user: User
 }
 
 
-init : (Route, Location) -> (Model, Cmd Msg)
-init (route, location) =
+init : Maybe HoboAuth -> (Model, Cmd Msg)
+init auth =
   let
-    data = Expenses.initialModel
-    user = User "" "" False "" 0.5 "USD"
+    data = Expenses.State.initialState
+    defaultUser = User "" "" False "" 0.5 "USD"
   in
-    (Model data user location route, Cmd.none)
+    case auth of
+      Just auth ->
+        let
+          user = { defaultUser | apiBaseUrl = auth.apiBaseUrl,
+                                 email = auth.email,
+                                 token = auth.token }
+        in
+          (Model data user, checkUser user)
+
+      Nothing -> (Model data defaultUser, Cmd.none)
+
 
 initialLoadEffects : User -> Cmd Msg
 initialLoadEffects user =
@@ -106,36 +73,18 @@ loadExpensesEffect user =
 
 loadBudgetsEffect : User -> Cmd Msg
 loadBudgetsEffect user =
-  getBudgets user |> Cmd.map Messages.Expenses.BudgetList |> Cmd.map List
+  getBudgets user |> Cmd.map Expenses.Types.BudgetList |> Cmd.map List
 
 
 -- UPDATE
-type alias CheckData = (Float, String)
-
-urlUpdate : (Route, Location) -> Model -> (Model, Cmd Msg)
-urlUpdate (route, location) model =
-  ({ model | route = route, location = location }, Cmd.none)
-
-
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  case (Debug.log "msg" msg) of
+  case msg of
     List listAction ->
       let
-        (listData, fx) = Expenses.update model.user listAction model.data
+        (listData, fx) = Expenses.State.update model.user listAction model.data
       in
         ({ model | data = listData }, Cmd.map List fx)
-
-    Login hoboAuth ->
-      let
-        oldUser = model.user
-        user = { oldUser |
-          apiBaseUrl = hoboAuth.apiBaseUrl,
-          email = hoboAuth.email,
-          token = hoboAuth.token
-        }
-      in
-        ({ model | user = user }, checkUser user)
 
     UserCheckOk result ->
       let
@@ -151,20 +100,6 @@ update msg model =
       in
         (model, Cmd.none)
 
-    NavigateTo path ->
-      let
-        cmd = makeUrl routerConfig path |> Navigation.modifyUrl
-      in
-        (model, cmd)
-
-    SetQuery query ->
-      let
-        cmd = model.location
-                |> setQuery query
-                |> makeUrlFromLocation routerConfig
-                |> Navigation.modifyUrl
-      in
-        (model, cmd)
 
 -- VIEW
 view : Model -> Html Msg
@@ -174,7 +109,7 @@ view model =
       text ("Welcome " ++ model.user.email)
     ],
     div [ class "clear mt1" ] [
-      map List (Expenses.view model.user model.data)
+      map List (Expenses.View.root model.user model.data)
     ]
   ]
 
@@ -208,8 +143,3 @@ decodeUserFields =
   Json.object2 (,)
     ( "week_fraction"   := Json.float )
     ( "currency"        := Json.string )
-
--- SUBSCRIPTIONS
-subscriptions : a -> Sub Msg
-subscriptions model =
-  userData Login
