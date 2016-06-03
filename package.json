@@ -6,7 +6,7 @@
   "repository": "https://github.com/aspushkinus/hobo-elm",
   "scripts": {
     "start": "webpack-dev-server --content-base src/",
-    "build": "rimraf dist && webpack && cp -r src/img/ dist/img/",
+    "build": "rimraf dist && webpack && cp -r img/ dist/img/",
     "watch": "webpack --watch"
   },
   "keywords": [
