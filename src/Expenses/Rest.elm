@@ -1,4 +1,4 @@
-module Services.Expenses exposing(..)
+module Expenses.Rest exposing (getExpenses, addExpense, deleteExpense)
 
 import Http
 import HttpBuilder exposing (..)
@@ -7,20 +7,19 @@ import Json.Decode as Json exposing((:=))
 import Json.Encode
 import Date
 
-import Records exposing (User, Expense, Budget, RecordId, BudgetId)
+import Types exposing (..)
+import Expenses.Types exposing (..)
+import Budgets.Types exposing (BudgetId)
 
 import Utils.Numbers exposing (toFloatPoh, formatAmount)
-import Messages.Expenses exposing (..)
 
-
-getTotal : List Expense -> Float
-getTotal expenses =
-  List.foldl (\ex sum -> sum + ex.amount) 0.0 expenses
-
+-- decodeExpenses
 
 getExpenses : User -> Int -> Cmd Msg
 getExpenses user weekNumber =
-  Http.get decodeExpenses (expensesUrl user weekNumber)
+  get (expensesUrl user weekNumber)
+    |> withHeader "Content-Type" "application/json"
+    |> send (jsonReader decodeExpenses) (jsonReader decodeExpenses)
     |> Task.toResult
     |> Task.perform UpdateList UpdateList
 

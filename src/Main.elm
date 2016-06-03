@@ -10,15 +10,17 @@ import Task
 import Json.Decode as Json exposing((:=))
 import Json.Encode
 
-import Components.Expenses as Expenses
-import Components.BudgetButtonList exposing (getBudgets)
-import Records exposing (User, HoboAuth)
+import Types exposing (..)
+import Expenses.Types
+import Expenses.State
+import Expenses.View
+
+import Budgets.Rest exposing (getBudgets)
+import Expenses.Rest exposing (getExpenses)
+
 import Utils.Parsers exposing (resultToObject)
 
-import Messages.Expenses
 import Messages.Main exposing(..)
-
-import Services.Expenses exposing (getExpenses)
 
 
 -- PROGRAM
@@ -34,7 +36,7 @@ main =
 
 -- MODEL
 type alias Model = {
-  data: Expenses.Model,
+  data: Expenses.Types.Model,
   user: User
 }
 
@@ -42,7 +44,7 @@ type alias Model = {
 init : Maybe HoboAuth -> (Model, Cmd Msg)
 init auth =
   let
-    data = Expenses.initialModel
+    data = Expenses.State.initialState
     defaultUser = User "" "" False "" 0.5 "USD"
   in
     case auth of
@@ -71,7 +73,7 @@ loadExpensesEffect user =
 
 loadBudgetsEffect : User -> Cmd Msg
 loadBudgetsEffect user =
-  getBudgets user |> Cmd.map Messages.Expenses.BudgetList |> Cmd.map List
+  getBudgets user |> Cmd.map Expenses.Types.BudgetList |> Cmd.map List
 
 
 -- UPDATE
@@ -80,7 +82,7 @@ update msg model =
   case msg of
     List listAction ->
       let
-        (listData, fx) = Expenses.update model.user listAction model.data
+        (listData, fx) = Expenses.State.update model.user listAction model.data
       in
         ({ model | data = listData }, Cmd.map List fx)
 
@@ -107,7 +109,7 @@ view model =
       text ("Welcome " ++ model.user.email)
     ],
     div [ class "clear mt1" ] [
-      map List (Expenses.view model.user model.data)
+      map List (Expenses.View.root model.user model.data)
     ]
   ]
 
