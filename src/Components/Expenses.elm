@@ -7,11 +7,9 @@ import Html.App exposing(map)
 import Date
 
 import Components.BudgetButtonList as BBL
-import Components.Amount as Amount
 
 import Records exposing (User, Expense, Budget, RecordId, BudgetId)
 import Messages.Expenses exposing(..)
-
 import Services.Expenses exposing(..)
 
 import Utils.Numbers exposing (toFloatPoh, formatAmount)
@@ -32,8 +30,8 @@ initialModel : Model
 initialModel =
   Model BBL.initialModel [] 2 0 ""
 
--- UPDATE
 
+-- UPDATE
 update : User -> Msg -> Model -> (Model, Cmd Msg)
 update user msg model =
   case msg of
@@ -45,15 +43,6 @@ update user msg model =
         (buttonData, fx) = BBL.update user bblAction model.buttons
       in
         ({ model | buttons = buttonData }, Cmd.map BudgetList fx)
-
-    AmountView expenseId msg ->
-      let
-        updateFunc expenseId expense =
-          if expenseId == expense.id then Amount.update user msg expense else (expense, Cmd.none)
-
-        expensesFx = List.unzip (List.map (updateFunc expenseId) model.expenses)
-      in
-        ({ model | expenses = fst expensesFx }, Cmd.batch (snd expensesFx))
 
     -- adding/removing expenses
     RequestAdd ->
@@ -88,12 +77,6 @@ update user msg model =
       in
         ({ model | expenses = newExpenses }, Cmd.none)
 
-    CancelDelete target ->
-      let
-        newExpenses = List.map (\e -> { e | clicked = False }) model.expenses
-      in
-        ({ model | expenses = newExpenses}, Cmd.none)
-
     -- loading and displaying the list
     RequestList ->
       (model, getExpenses user model.weekNumber)
@@ -118,20 +101,19 @@ update user msg model =
 -- VIEW
 expenseItem : Expense -> Html Msg
 expenseItem expense =
-  let
-    amountView = map (AmountView expense.id) (Amount.view expense)
-  in
-    tr [ ] [
-      td [ ] [
-        span [ class "date" ] [
-          div [ class "date-header" ] [ text (Date.month expense.createdAt |> toString) ],
-          div [ class "date-day" ] [ text (Date.day expense.createdAt |> toString) ]
-        ]
-      ],
-      td [ ] [ text expense.budgetName ],
-      td [ ] [ text expense.createdByName ],
-      td [ class "text-right" ] [ amountView ]
-    ]
+  tr [ ] [
+    td [ ] [
+      span [ class "date" ] [
+        div [ class "date-header" ] [ text (Date.month expense.createdAt |> toString) ],
+        div [ class "date-day" ] [ text (Date.day expense.createdAt |> toString) ]
+      ]
+    ],
+    td [ ] [
+      a [ href "#" ] [ text expense.budgetName ]
+    ],
+    td [ ] [ text expense.createdByName ],
+    td [ class "text-right" ] [ text (formatAmount expense.amount) ]
+  ]
 
 viewExpenseList : List Expense -> String -> Html Msg
 viewExpenseList filteredExpenses totalString =
@@ -205,7 +187,7 @@ view user model =
     expensesTotal = getTotal expenses |> formatAmount
 
   in
-    div [ onClick (CancelDelete "delete") ] [
+    div [ ] [
       viewButtonlist user model.expenses model,
       viewExpenseForm model,
 
@@ -217,3 +199,9 @@ view user model =
         viewExpenseList expenses expensesTotal
       ]
     ]
+
+viewExpense : User -> Model -> Html Msg
+viewExpense user model =
+  div [ ] [
+    text "It works!"
+  ]

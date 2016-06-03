@@ -66,7 +66,6 @@ if ( TARGET_ENV === 'development' ) {
           loaders: [
             'style-loader',
             'css-loader',
-            'postcss-loader',
             'sass-loader'
           ]
         },
@@ -105,7 +104,6 @@ if ( TARGET_ENV === 'production' ) {
           test: /\.(css|scss)$/,
           loader: ExtractTextPlugin.extract( 'style-loader', [
             'css-loader',
-            'postcss-loader',
             'sass-loader'
           ])
         },
