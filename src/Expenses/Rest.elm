@@ -13,8 +13,6 @@ import Budgets.Types exposing (BudgetId)
 
 import Utils.Numbers exposing (toFloatPoh, formatAmount)
 
--- decodeExpenses
-
 getExpenses : User -> Int -> Cmd Msg
 getExpenses user weekNumber =
   get (expensesUrl user weekNumber)

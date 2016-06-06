@@ -1,9 +1,9 @@
 // pull in desired CSS/SASS files
-require('../styles/base.css')
-require('../styles/hobo.css')
+require('./styles/base.css')
+require('./styles/hobo.scss')
 require('font-awesome-webpack')
 
-const Elm = require('./Main')
+const Elm = require('./src/Main')
 
 const hoboAuthKey = 'hobo-auth'
 const fbAppId = location.hostname === 'localhost' ? '1766948786854513' : '1752657608283631'

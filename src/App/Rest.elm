@@ -35,6 +35,7 @@ decodeUser : Json.Decoder CheckData
 decodeUser =
   Json.at ["user"] decodeUserFields
 
+
 decodeUserFields : Json.Decoder CheckData
 decodeUserFields =
   Json.object2 (,)

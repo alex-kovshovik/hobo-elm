@@ -7,6 +7,7 @@ import Html.App as Html exposing(map)
 import App.Types exposing (..)
 
 import Expenses.View
+import Routes exposing (..)
 
 
 root : Model -> Html Msg
@@ -16,6 +17,25 @@ root model =
       text ("Welcome " ++ model.user.email)
     ],
     div [ class "clear mt1" ] [
-      map List (Expenses.View.root model.user model.data)
+      pages model
     ]
   ]
+
+
+pages : Model -> Html Msg
+pages model =
+  case model.route of
+    ExpensesRoute ->
+      map List (Expenses.View.root model.user model.data)
+
+    ExpenseRoute expenseId ->
+      text "Not implemented"
+
+    BudgetsRoute ->
+      text "Not implemented"
+
+    BudgetRoute budgetId ->
+      text "Not implemented"
+
+    NotFoundRoute ->
+      text "404 Not Found"

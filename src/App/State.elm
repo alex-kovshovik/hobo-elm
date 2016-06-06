@@ -1,4 +1,4 @@
-module App.State exposing (initialState, update)
+module App.State exposing (initialState, init, update, urlUpdate)
 
 import Types exposing (..)
 import App.Types exposing (..)
@@ -9,12 +9,21 @@ import Budgets.Rest exposing (getBudgets)
 
 import Expenses.State
 import Expenses.Types
+import Routes exposing (Route)
 
 import Utils.Parsers exposing (resultToObject)
 
 
-initialState : Maybe HoboAuth -> (Model, Cmd Msg)
-initialState auth =
+init : Maybe HoboAuth -> Result String Route -> (Model, Cmd Msg)
+init auth result =
+  let
+    currentRoute = Routes.routeFromResult result
+  in
+    initialState auth currentRoute
+
+
+initialState : Maybe HoboAuth -> Route -> (Model, Cmd Msg)
+initialState auth route =
   let
     data = Expenses.State.initialState
     defaultUser = User "" "" False "" 0.5 "USD"
@@ -26,9 +35,9 @@ initialState auth =
                                  email = auth.email,
                                  token = auth.token }
         in
-          (Model data user, checkUser user)
+          (Model data user route, checkUser user)
 
-      Nothing -> (Model data defaultUser, Cmd.none)
+      Nothing -> (Model data defaultUser route, Cmd.none)
 
 
 initialLoadEffects : User -> Cmd Msg
@@ -49,6 +58,14 @@ loadBudgetsEffect user =
 
 
 -- UPDATE
+urlUpdate : Result String Route -> Model -> (Model, Cmd Msg)
+urlUpdate result model =
+  let
+    currentRoute = Routes.routeFromResult result
+  in
+    ({ model | route = currentRoute }, Cmd.none)
+
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of

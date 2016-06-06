@@ -10,6 +10,7 @@ import Expenses.Types exposing (Expense)
 
 import Budgets.Button.View as BudgetButton
 
+
 root : User -> Int -> List Expense -> Model -> Html Msg
 root user weekNumber expenses model =
   div [ class "clear" ] (List.map (budgetButton user weekNumber expenses model) model.budgets)
