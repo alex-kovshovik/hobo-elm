@@ -8,6 +8,7 @@ import Expenses.Rest exposing (getExpenses)
 import Budgets.Rest exposing (getBudgets)
 
 import Expenses.State
+import Expense.State
 import Expenses.Types
 import Routes exposing (Route)
 
@@ -26,6 +27,7 @@ initialState : Maybe HoboAuth -> Route -> (Model, Cmd Msg)
 initialState auth route =
   let
     data = Expenses.State.initialState
+    editData = Expense.State.initialState
     defaultUser = User "" "" False "" 0.5 "USD"
   in
     case auth of
@@ -35,9 +37,9 @@ initialState auth route =
                                  email = auth.email,
                                  token = auth.token }
         in
-          (Model data user route, checkUser user)
+          (Model data editData user route, checkUser user)
 
-      Nothing -> (Model data defaultUser route, Cmd.none)
+      Nothing -> (Model data editData defaultUser route, Cmd.none)
 
 
 initialLoadEffects : User -> Cmd Msg
@@ -74,6 +76,12 @@ update msg model =
         (listData, fx) = Expenses.State.update model.user listAction model.data
       in
         ({ model | data = listData }, Cmd.map List fx)
+
+    Edit expenseAction ->
+      let
+        (editData, fx) = Expense.State.update model.user expenseAction model.editData
+      in
+        ({ model | editData = editData}, Cmd.map Edit fx)
 
     UserCheckOk result ->
       let

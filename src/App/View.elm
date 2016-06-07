@@ -6,6 +6,7 @@ import Html.App as Html exposing(map)
 
 import App.Types exposing (..)
 
+import Expense.View
 import Expenses.View
 import Routes exposing (..)
 
@@ -29,13 +30,13 @@ pages model =
       map List (Expenses.View.root model.user model.data)
 
     ExpenseRoute expenseId ->
-      text "Not implemented"
+      map Edit (Expense.View.root model.user model.data.expenses expenseId)
 
     BudgetsRoute ->
-      text "Not implemented"
+      text "List of budgets route"
 
     BudgetRoute budgetId ->
-      text "Not implemented"
+      text "One budget route"
 
     NotFoundRoute ->
       text "404 Not Found"

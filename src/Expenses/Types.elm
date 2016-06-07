@@ -23,7 +23,7 @@ type alias ExpenseList = List Expense
 
 type alias Model = {
   buttons : Budgets.Model,
-  expenses : List Expense,
+  expenses : ExpenseList,
   nextExpenseId : Int,
   weekNumber: Int, -- relative number of week, 0 (zero) means current
 
@@ -40,6 +40,9 @@ type Msg
   | RequestRemove Expense
   | UpdateAdded (Result (Error Expense) (Response Expense))
   | UpdateRemoved (Result (Error Expense) (Response Expense))
+
+  -- showing/editing expenses
+  | Show Expense
 
   -- loading and displaying the list
   | RequestList

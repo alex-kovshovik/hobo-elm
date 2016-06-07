@@ -48,7 +48,7 @@ expenseItem expense =
       ]
     ],
     td [ ] [
-      a [ href "#" ] [ text expense.budgetName ]
+      a [class "expense-link", onClick (Show expense) ] [ text expense.budgetName ]
     ],
     td [ ] [ text expense.createdByName ],
     td [ class "text-right" ] [ text (formatAmount expense.amount) ]

@@ -18,11 +18,11 @@ type Route
 matchers : Parser (Route -> a) a
 matchers =
   oneOf [
-    format ExpensesRoute (s ""),
-    format ExpensesRoute (s "expenses"),
     format ExpenseRoute (s "expenses" </> int),
+    format ExpensesRoute (s "expenses"),
+    format BudgetRoute (s "budgets" </> int),
     format BudgetsRoute (s "budgets"),
-    format BudgetRoute (s "budgets" </> int)
+    format ExpensesRoute (s "")
   ]
 
 

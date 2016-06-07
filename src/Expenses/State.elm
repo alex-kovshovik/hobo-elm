@@ -1,5 +1,6 @@
 module Expenses.State exposing(initialState, update)
 
+import Navigation
 import Date exposing (Date)
 import Types exposing (..)
 
@@ -60,6 +61,10 @@ update user msg model =
           Nothing -> model.expenses
       in
         ({ model | expenses = newExpenses }, Cmd.none)
+
+    -- showing/editing expenses
+    Show expense ->
+      (model, Navigation.modifyUrl ("#expenses/" ++ (toString expense.id)) )
 
     -- loading and displaying the list
     RequestList ->
