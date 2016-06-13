@@ -4,6 +4,13 @@ Simple and FAST family budget organizer. Very easy to use, no training necessary
 
 ## Change log
 
+### Juno 13, 2016
+
+- Add view/edit expense detail page (no save yet)
+- Refactor application into multiple components
+- Add routing for list vs view/edit, based on elm-lang/navigation
+- Some routing code is ugly, I'm considering changing it to use sporto/hop.
+
 ### May 16, 2016
 
 - Upgraded to Elm 0.17, yay!

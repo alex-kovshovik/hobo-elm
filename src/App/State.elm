@@ -10,7 +10,7 @@ import Budgets.Rest exposing (getBudgets)
 import Expenses.State
 import Expense.State
 import Expenses.Types
-import Routes exposing (Route)
+import Routes exposing (..)
 
 import Utils.Parsers exposing (resultToObject)
 
@@ -63,9 +63,30 @@ loadBudgetsEffect user =
 urlUpdate : Result String Route -> Model -> (Model, Cmd Msg)
 urlUpdate result model =
   let
-    currentRoute = Routes.routeFromResult result
+    route = Routes.routeFromResult result
+
+    newModel =
+      case route of
+        ExpensesRoute ->
+          model
+
+        ExpenseRoute expenseId ->
+          let
+            expense = List.filter (\e -> e.id == expenseId) model.data.expenses |> List.head
+
+            oldEditData = model.editData
+
+            editData =
+              case expense of
+                Just e -> { oldEditData | comment = e.comment, expense = e }
+                Nothing -> oldEditData
+          in
+            { model | editData = editData }
+
+        NotFoundRoute ->
+          model
   in
-    ({ model | route = currentRoute }, Cmd.none)
+    ({ newModel | route = route }, Cmd.none)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)

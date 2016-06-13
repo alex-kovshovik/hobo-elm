@@ -30,13 +30,13 @@ pages model =
       map List (Expenses.View.root model.user model.data)
 
     ExpenseRoute expenseId ->
-      map Edit (Expense.View.root model.user model.data.expenses expenseId)
+      map Edit (Expense.View.root model.user model.editData)
 
-    BudgetsRoute ->
-      text "List of budgets route"
-
-    BudgetRoute budgetId ->
-      text "One budget route"
-
+    -- BudgetsRoute ->
+    --   text "List of budgets route"
+    --
+    -- BudgetRoute budgetId ->
+    --   text "One budget route"
+    --
     NotFoundRoute ->
       text "404 Not Found"

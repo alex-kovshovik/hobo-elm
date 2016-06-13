@@ -5,7 +5,6 @@ import Html.App exposing (map)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Date
--- import Platform.Cmd as Cmd
 
 import Types exposing (..)
 import Expenses.Types exposing (..)

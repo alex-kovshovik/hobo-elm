@@ -1,12 +1,14 @@
 module Expense.Types exposing (..)
 
-import Expenses.Types exposing (ExpenseId)
+import Expenses.Types exposing (Expense)
 
 type Msg
-  = Show
-  | Edit
+  = NoOp
+  | CommentInput String
   | Update
+  | Cancel
 
 type alias Model = {
-  expenseId: ExpenseId
+  expense: Expense,
+  comment: String
 }

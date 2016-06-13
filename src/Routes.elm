@@ -5,13 +5,13 @@ import Navigation
 import UrlParser exposing (..)
 
 import Expenses.Types exposing (ExpenseId)
-import Budgets.Types exposing (BudgetId)
+-- import Budgets.Types exposing (BudgetId)
 
 type Route
     = ExpensesRoute
     | ExpenseRoute ExpenseId
-    | BudgetsRoute
-    | BudgetRoute BudgetId
+    -- | BudgetsRoute
+    -- | BudgetRoute BudgetId
     | NotFoundRoute
 
 
@@ -20,8 +20,8 @@ matchers =
   oneOf [
     format ExpenseRoute (s "expenses" </> int),
     format ExpensesRoute (s "expenses"),
-    format BudgetRoute (s "budgets" </> int),
-    format BudgetsRoute (s "budgets"),
+    -- format BudgetRoute (s "budgets" </> int),
+    -- format BudgetsRoute (s "budgets"),
     format ExpensesRoute (s "")
   ]
 
