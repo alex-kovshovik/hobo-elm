@@ -5,6 +5,7 @@ import Html.App exposing (map)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Date
+import String
 
 import Types exposing (..)
 import Expenses.Types exposing (..)
@@ -37,6 +38,15 @@ root user model =
     ]
 
 
+expenseItemLinkText : Expense -> String
+expenseItemLinkText expense =
+  let
+    title = expense.budgetName ++
+      if String.length expense.comment > 0 then " ***" else ""
+  in
+    title
+
+
 expenseItem : Expense -> Html Msg
 expenseItem expense =
   tr [ ] [
@@ -47,7 +57,7 @@ expenseItem expense =
       ]
     ],
     td [ ] [
-      a [class "expense-link", onClick (Show expense) ] [ text expense.budgetName ]
+      a [class "expense-link", onClick (Show expense) ] [ text (expenseItemLinkText expense) ]
     ],
     td [ ] [ text expense.createdByName ],
     td [ class "text-right" ] [ text (formatAmount expense.amount) ]
