@@ -2,6 +2,7 @@ module App.View exposing (root)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Html.App as Html exposing(map)
 
 import App.Types exposing (..)
@@ -14,10 +15,18 @@ import Routes exposing (..)
 root : Model -> Html Msg
 root model =
   div [ class "container"] [
-    div [ class "clear col-12 mt1" ] [
-      text ("Welcome " ++ model.user.email)
+    div [ class "mt1" ] [
+      div [ class "col-8" ] [
+        text ("Welcome " ++ model.user.email)
+      ],
+      div [ class "col-4", style [("text-align", "right")] ] [
+        a [ onClick EditBudgets ] [ text "Edit budgets" ]
+      ],
+      br [ ] [ ],
+      br [ ] [ ]
     ],
-    div [ class "clear mt1" ] [
+
+    div [  ] [
       pages model
     ]
   ]
@@ -32,9 +41,9 @@ pages model =
     ExpenseRoute expenseId ->
       map Edit (Expense.View.root model.user model.editData)
 
-    -- BudgetsRoute ->
-    --   text "List of budgets route"
-    --
+    BudgetsRoute ->
+      text "List of budgets route"
+
     -- BudgetRoute budgetId ->
     --   text "One budget route"
     --

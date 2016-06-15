@@ -38,7 +38,6 @@ update user msg model =
     LoadOk result ->
       let
         expense = resultToObject result |> Maybe.withDefault (emptyExpense)
-        _ = Debug.log "loaded expense" expense
       in
         ({ model | expense = expense, comment = expense.comment}, Cmd.none)
 

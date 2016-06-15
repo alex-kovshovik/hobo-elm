@@ -16,6 +16,10 @@ body {
   font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
+a {
+  cursor: pointer;
+}
+
 /**
  * Form
  */
@@ -191,8 +195,4 @@ div.date-header {
 
 div.date-day {
   font-size: 0.8rem;
-}
-
-a.expense-link {
-  cursor: pointer;
 }

@@ -10,7 +10,7 @@ import Expenses.Types exposing (ExpenseId)
 type Route
     = ExpensesRoute
     | ExpenseRoute ExpenseId
-    -- | BudgetsRoute
+    | BudgetsRoute
     -- | BudgetRoute BudgetId
     | NotFoundRoute
 

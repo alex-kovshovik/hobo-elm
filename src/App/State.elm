@@ -1,7 +1,5 @@
 module App.State exposing (initialState, init, update, urlUpdate)
 
-import Navigation
-
 import Types exposing (..)
 import App.Types exposing (..)
 
@@ -49,10 +47,13 @@ routeLoadCommands : Model -> Cmd Msg
 routeLoadCommands model =
   case model.route of
     ExpensesRoute ->
-      loadExpensesEffect model.user
+      loadExpensesCommand model.user
 
     ExpenseRoute expenseId ->
-      loadExpenseCmd model.user expenseId
+      loadExpenseCommand model.user expenseId
+
+    BudgetsRoute ->
+      loadBudgetsEffect model.user
 
     NotFoundRoute ->
       Cmd.none
@@ -65,13 +66,13 @@ afterUserCheckCommands model =
     else Cmd.none
 
 
-loadExpenseCmd : User -> ExpenseId -> Cmd Msg
-loadExpenseCmd user expenseId =
+loadExpenseCommand : User -> ExpenseId -> Cmd Msg
+loadExpenseCommand user expenseId =
   loadExpense user expenseId |> Cmd.map Edit
 
 
-loadExpensesEffect : User -> Cmd Msg
-loadExpensesEffect user =
+loadExpensesCommand : User -> Cmd Msg
+loadExpensesCommand user =
   getExpenses user 0 |> Cmd.map List
 
 
@@ -119,3 +120,6 @@ update msg model =
         _ = Debug.log "Login failed!" result
       in
         (model, Cmd.none)
+
+    EditBudgets ->
+      (model, Cmd.none)

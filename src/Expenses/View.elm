@@ -57,7 +57,7 @@ expenseItem expense =
       ]
     ],
     td [ ] [
-      a [class "expense-link", onClick (Show expense) ] [ text (expenseItemLinkText expense) ]
+      a [ onClick (Show expense) ] [ text (expenseItemLinkText expense) ]
     ],
     td [ ] [ text expense.createdByName ],
     td [ class "text-right" ] [ text (formatAmount expense.amount) ]
