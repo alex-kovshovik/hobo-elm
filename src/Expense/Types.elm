@@ -12,6 +12,8 @@ type Msg
   | Update
   | UpdateOk (Result (Error Expense) (Response Expense))
   | UpdateFail (Result (Error Expense) (Response Expense))
+  | Delete
+  | DeleteOk (Result (Error Expense) (Response Expense))
   | Cancel
 
 type alias Model = {

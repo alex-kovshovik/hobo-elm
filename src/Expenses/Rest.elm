@@ -1,4 +1,4 @@
-module Expenses.Rest exposing (getExpenses, addExpense, deleteExpense)
+module Expenses.Rest exposing (getExpenses, addExpense)
 
 import Http
 import HttpBuilder exposing (..)
@@ -37,14 +37,6 @@ addExpense user expense =
       |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
       |> Task.toResult
       |> Task.perform UpdateAdded UpdateAdded
-
-
-deleteExpense : User -> RecordId -> Cmd Msg
-deleteExpense user expenseId =
-  delete (deleteExpenseUrl user expenseId)
-    |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
-    |> Task.toResult
-    |> Task.perform UpdateRemoved UpdateRemoved
 
 
 expensesUrl : User -> Int -> String

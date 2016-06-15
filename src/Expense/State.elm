@@ -11,7 +11,7 @@ import Types exposing (..)
 import Expense.Types exposing (..)
 import Expenses.Types as Expenses
 
-import Expense.Rest exposing(updateExpense)
+import Expense.Rest exposing(..)
 
 
 emptyExpense : Expenses.Expense
@@ -57,6 +57,12 @@ update user msg model =
 
     UpdateFail result ->
       ({ model | error = "Error saving the expense"}, Cmd.none)
+
+    Delete ->
+      (model, deleteExpense user model.expense.id)
+
+    DeleteOk result ->
+      (model, Navigation.modifyUrl "#expenses")
 
     Cancel ->
       (model, Navigation.modifyUrl "#expenses")
