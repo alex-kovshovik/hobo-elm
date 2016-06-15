@@ -3,19 +3,27 @@ module Expense.State exposing (initialState, update)
 import Navigation
 import Time
 import Date
+import Platform.Cmd exposing (map)
+
+import Utils.Parsers exposing(resultToObject)
 
 import Types exposing (..)
 import Expense.Types exposing (..)
-import Expenses.Types exposing (Expense)
+import Expenses.Types as Expenses
 
+import Expense.Rest exposing(updateExpense)
+
+
+emptyExpense : Expenses.Expense
+emptyExpense =
+  let
+    pohDate = Time.millisecond |> Date.fromTime
+  in
+    Expenses.Expense 0 0 "" "" 0.0 "" pohDate False
 
 initialState : Model
 initialState =
-  let
-    date = Time.millisecond |> Date.fromTime
-    expense = Expense 0 0 "" "" 0.0 "" date False
-  in
-    Model expense ""
+  Model emptyExpense "" ""
 
 
 update : User -> Msg -> Model -> (Model, Cmd Msg)
@@ -27,8 +35,28 @@ update user msg model =
     CommentInput comment ->
       ({ model | comment = comment}, Cmd.none)
 
+    LoadOk result ->
+      let
+        expense = resultToObject result |> Maybe.withDefault (emptyExpense)
+        _ = Debug.log "loaded expense" expense
+      in
+        ({ model | expense = expense, comment = expense.comment}, Cmd.none)
+
+    LoadFail result ->
+      ({ model | error = "Error loading the expense"}, Cmd.none)
+
     Update ->
-      (model, Cmd.none)
+      let
+        e = model.expense
+        expense = { e | comment = model.comment }
+      in
+        (model, updateExpense user expense)
+
+    UpdateOk result ->
+      (model, Navigation.modifyUrl "#expenses")
+
+    UpdateFail result ->
+      ({ model | error = "Error saving the expense"}, Cmd.none)
 
     Cancel ->
       (model, Navigation.modifyUrl "#expenses")

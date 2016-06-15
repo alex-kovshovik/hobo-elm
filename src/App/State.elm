@@ -1,15 +1,18 @@
 module App.State exposing (initialState, init, update, urlUpdate)
 
+import Navigation
+
 import Types exposing (..)
 import App.Types exposing (..)
 
 import App.Rest exposing (checkUser)
+import Expense.Rest exposing (loadExpense)
 import Expenses.Rest exposing (getExpenses)
 import Budgets.Rest exposing (getBudgets)
 
 import Expenses.State
 import Expense.State
-import Expenses.Types
+import Expenses.Types exposing (Expense, ExpenseId)
 import Routes exposing (..)
 
 import Utils.Parsers exposing (resultToObject)
@@ -42,11 +45,29 @@ initialState auth route =
       Nothing -> (Model data editData defaultUser route, Cmd.none)
 
 
-initialLoadEffects : User -> Cmd Msg
-initialLoadEffects user =
-  if user.authenticated
-    then Cmd.batch [ loadExpensesEffect user, loadBudgetsEffect user ]
+routeLoadCommands : Model -> Cmd Msg
+routeLoadCommands model =
+  case model.route of
+    ExpensesRoute ->
+      loadExpensesEffect model.user
+
+    ExpenseRoute expenseId ->
+      loadExpenseCmd model.user expenseId
+
+    NotFoundRoute ->
+      Cmd.none
+
+
+afterUserCheckCommands : Model -> Cmd Msg
+afterUserCheckCommands model =
+  if model.user.authenticated
+    then Cmd.batch [ loadBudgetsEffect model.user, routeLoadCommands model ]
     else Cmd.none
+
+
+loadExpenseCmd : User -> ExpenseId -> Cmd Msg
+loadExpenseCmd user expenseId =
+  loadExpense user expenseId |> Cmd.map Edit
 
 
 loadExpensesEffect : User -> Cmd Msg
@@ -64,29 +85,9 @@ urlUpdate : Result String Route -> Model -> (Model, Cmd Msg)
 urlUpdate result model =
   let
     route = Routes.routeFromResult result
-
-    newModel =
-      case route of
-        ExpensesRoute ->
-          model
-
-        ExpenseRoute expenseId ->
-          let
-            expense = List.filter (\e -> e.id == expenseId) model.data.expenses |> List.head
-
-            oldEditData = model.editData
-
-            editData =
-              case expense of
-                Just e -> { oldEditData | comment = e.comment, expense = e }
-                Nothing -> oldEditData
-          in
-            { model | editData = editData }
-
-        NotFoundRoute ->
-          model
+    newModel = { model | route = route }
   in
-    ({ newModel | route = route }, Cmd.none)
+    (newModel, routeLoadCommands newModel)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -109,8 +110,9 @@ update msg model =
         params = Maybe.withDefault (0.0, "") (resultToObject result)
         oldUser = model.user
         newUser = { oldUser | authenticated = True, weekFraction = fst params, currency = snd params }
+        newModel = { model | user = newUser }
       in
-        ({ model | user = newUser }, initialLoadEffects newUser)
+        (newModel, afterUserCheckCommands newModel)
 
     UserCheckFail result ->
       let

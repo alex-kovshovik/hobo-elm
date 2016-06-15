@@ -48,7 +48,7 @@ root user model =
 
       p [ ] [
         div [ class "field-group" ] [
-          button [ ] [ text "Save" ],
+          button [ onClick Update ] [ text "Save" ],
           button [ onClick Cancel ] [ text "Cancel" ]
         ]
       ]
