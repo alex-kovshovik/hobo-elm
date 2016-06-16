@@ -49,11 +49,11 @@ root user model =
       p [ ] [
         div [ class "field-group" ] [
           div [ class "col-8" ] [
-            button [ onClick Update ] [ text "Save" ],
-            button [ onClick Cancel ] [ text "Cancel" ]
+            button [ class "button", onClick Update ] [ text "Save" ],
+            button [ class "button", onClick Cancel ] [ text "Cancel" ]
           ],
           div [ class "col-4", style [("text-align", "right")] ] [
-            button [ onClick Delete ] [ text "Delete" ]
+            button [ class "button", onClick Delete ] [ text "Delete" ]
           ]
         ]
       ]

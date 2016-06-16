@@ -1,5 +1,7 @@
 module App.State exposing (initialState, init, update, urlUpdate)
 
+import Navigation
+
 import Types exposing (..)
 import App.Types exposing (..)
 
@@ -10,6 +12,7 @@ import Budgets.Rest exposing (getBudgets)
 
 import Expenses.State
 import Expense.State
+import BudgetEditor.State
 import Expenses.Types exposing (Expense, ExpenseId)
 import Routes exposing (..)
 
@@ -94,17 +97,25 @@ urlUpdate result model =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    List listAction ->
+    List listMsg ->
       let
-        (listData, fx) = Expenses.State.update model.user listAction model.data
+        (listData, fx) = Expenses.State.update model.user listMsg model.data
       in
         ({ model | data = listData }, Cmd.map List fx)
 
-    Edit expenseAction ->
+    Edit expenseMsg ->
       let
-        (editData, fx) = Expense.State.update model.user expenseAction model.editData
+        (editData, fx) = Expense.State.update model.user expenseMsg model.editData
       in
         ({ model | editData = editData}, Cmd.map Edit fx)
+
+    BudgetEditor editorMsg ->
+      let
+        oldData = model.data
+        (buttons, fx) = BudgetEditor.State.update model.user editorMsg oldData.buttons
+        data = { oldData | buttons = buttons }
+      in
+        ({ model | data = data }, Cmd.map BudgetEditor fx)
 
     UserCheckOk result ->
       let
@@ -122,4 +133,4 @@ update msg model =
         (model, Cmd.none)
 
     EditBudgets ->
-      (model, Cmd.none)
+      (model, Navigation.modifyUrl "#budgets")

@@ -9,6 +9,7 @@ import App.Types exposing (..)
 
 import Expense.View
 import Expenses.View
+import BudgetEditor.View
 import Routes exposing (..)
 
 
@@ -42,7 +43,7 @@ pages model =
       map Edit (Expense.View.root model.user model.editData)
 
     BudgetsRoute ->
-      text "List of budgets route"
+      map BudgetEditor (BudgetEditor.View.root model.user model.data.buttons)
 
     -- BudgetRoute budgetId ->
     --   text "One budget route"

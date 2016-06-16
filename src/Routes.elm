@@ -21,7 +21,7 @@ matchers =
     format ExpenseRoute (s "expenses" </> int),
     format ExpensesRoute (s "expenses"),
     -- format BudgetRoute (s "budgets" </> int),
-    -- format BudgetsRoute (s "budgets"),
+    format BudgetsRoute (s "budgets"),
     format ExpensesRoute (s "")
   ]
 
