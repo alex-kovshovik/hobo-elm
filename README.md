@@ -4,7 +4,13 @@ Simple and FAST family budget organizer. Very easy to use, no training necessary
 
 ## Change log
 
-### Juno 13, 2016
+### June 17, 2016
+
+- Add full expense editing
+- Add full budget list editing
+- Cancel the switch to React/Redux LOL!
+
+### June 13, 2016
 
 - Add view/edit expense detail page (no save yet)
 - Refactor application into multiple components
