@@ -20,7 +20,14 @@ class HoboJs {
   }
 
   embedElmApp (auth) {
-    Elm.Main.embed(document.getElementById('main'), auth)
+    const elmApp = Elm.Main.embed(document.getElementById('main'), auth)
+
+    elmApp.ports.logout.subscribe(function(message) {
+      console.log("Logout message", message)
+      
+      window.localStorage.clear()
+      window.location.reload()
+    })
   }
 
   getAuth () {

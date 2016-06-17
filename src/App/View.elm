@@ -17,11 +17,13 @@ root : Model -> Html Msg
 root model =
   div [ class "container"] [
     div [ class "mt1" ] [
-      div [ class "col-8" ] [
+      div [ class "col-6" ] [
         text ("Welcome " ++ model.user.email)
       ],
-      div [ class "col-4", style [("text-align", "right")] ] [
-        a [ onClick EditBudgets ] [ text "Edit budgets" ]
+      div [ class "col-6", style [("text-align", "right")] ] [
+        a [ onClick EditBudgets ] [ text "Budgets" ],
+        text " | ",
+        a [ onClick Logout ] [ text "Logout" ]
       ],
       br [ ] [ ],
       br [ ] [ ]

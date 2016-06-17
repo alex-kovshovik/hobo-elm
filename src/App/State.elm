@@ -15,6 +15,7 @@ import Expense.State
 import BudgetEditor.State
 import Expenses.Types exposing (Expense, ExpenseId)
 import Routes exposing (..)
+import Ports exposing (logout)
 
 import Utils.Parsers exposing (resultToObject)
 
@@ -140,3 +141,6 @@ update msg model =
 
     EditBudgets ->
       (model, Navigation.modifyUrl "#budgets")
+
+    Logout ->
+      (model, logout "Bye murthafuckas!")

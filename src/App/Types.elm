@@ -24,3 +24,4 @@ type Msg
   | UserCheckOk (Result (Error CheckData) (Response CheckData))
   | UserCheckFail (Result (Error CheckData) (Response CheckData))
   | EditBudgets
+  | Logout
