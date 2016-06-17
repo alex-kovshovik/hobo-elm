@@ -8,7 +8,7 @@ import Utils.Parsers exposing (resultToObject)
 import Types exposing (..)
 import Budgets.Types exposing (Model, Budget)
 import BudgetEditor.Types exposing (..)
-import BudgetEditor.Rest exposing (saveBudgets)
+import BudgetEditor.Rest exposing (saveBudgets, deleteBudget)
 
 
 update : User -> Msg -> Model -> (Model, Cmd Msg)
@@ -58,7 +58,11 @@ update user msg model =
         ({ model | budgets = budgets }, Navigation.modifyUrl "#expenses")
 
     Delete budgetId ->
-      (model, Cmd.none) -- TODO: to be continued!
+      let
+        fx = if budgetId < 0 then Cmd.none else deleteBudget user budgetId
+        budgets = List.filter (\b -> b.id /= budgetId) model.budgets
+      in
+        ({ model | budgets = budgets }, fx)
 
     DeleteOk result ->
       (model, Cmd.none)

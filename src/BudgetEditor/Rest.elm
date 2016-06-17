@@ -1,15 +1,15 @@
-module BudgetEditor.Rest exposing (saveBudgets)
+module BudgetEditor.Rest exposing (saveBudgets, deleteBudget)
 
 import HttpBuilder exposing (..)
 import Json.Encode
 import Task
 
 import Types exposing (..)
-import Budgets.Types exposing (Budget)
+import Budgets.Types exposing (Budget, BudgetId)
 import Budgets.Rest exposing (decodeBudgets)
 import BudgetEditor.Types exposing (..)
 
-import Urls exposing (budgetsUrl)
+import Urls exposing (budgetsUrl, deleteBudgetUrl)
 
 saveBudgets : User -> List Budget -> Cmd Msg
 saveBudgets user budgets =
@@ -21,6 +21,16 @@ saveBudgets user budgets =
     |> Task.perform SaveOk SaveOk
 
 
+deleteBudget : User -> BudgetId -> Cmd Msg
+deleteBudget user budgetId =
+  delete (deleteBudgetUrl user budgetId)
+    |> withHeader "Content-Type" "application/json"
+    |> send stringReader stringReader
+    |> Task.toResult
+    |> Task.perform DeleteOk DeleteOk
+
+
+-- Encoders and decoders
 encodeBudgets : List Budget -> Json.Encode.Value
 encodeBudgets budgets =
   let

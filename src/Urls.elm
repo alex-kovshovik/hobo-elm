@@ -45,6 +45,14 @@ budgetsUrl user =
       ("user_email", user.email) ]
 
 
+deleteBudgetUrl : User -> BudgetId -> String
+deleteBudgetUrl user budgetId =
+  let
+    baseUrl = user.apiBaseUrl ++ "budgets/" ++ (toString budgetId)
+  in
+    Http.url baseUrl (authParams user)
+
+
 authParams : User -> List (String, String)
 authParams user =
   [ ("user_token", user.token),

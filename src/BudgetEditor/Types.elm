@@ -12,5 +12,5 @@ type Msg
   | Save
   | SaveOk (Result (Error (List Budget)) (Response (List Budget)))
   | Delete Int
-  | DeleteOk (Result (Error (List Budget)) (Response (List Budget)))
+  | DeleteOk (Result (Error String) (Response String))
   | Cancel
