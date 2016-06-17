@@ -27,7 +27,7 @@ root model =
       br [ ] [ ]
     ],
 
-    div [  ] [
+    div [ ] [
       pages model
     ]
   ]

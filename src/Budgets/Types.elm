@@ -13,7 +13,8 @@ type alias Budget = {
 
 type alias Model = {
   budgets : List Budget,
-  currentBudgetId : Maybe RecordId -- one or none can be selected.
+  currentBudgetId : Maybe RecordId, -- one or none can be selected.
+  nextBudgetId : BudgetId -- Only used for budget editing, negative numbers.
 }
 
 type Msg

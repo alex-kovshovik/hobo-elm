@@ -1,4 +1,4 @@
-module Budgets.Rest exposing (getBudgets)
+module Budgets.Rest exposing (getBudgets, decodeBudgets)
 
 import Task
 import Http
@@ -7,6 +7,7 @@ import Utils.Numbers exposing (toFloatPoh)
 
 import Types exposing (..)
 import Budgets.Types exposing (..)
+import Urls exposing (budgetsUrl)
 
 
 getBudgets : User -> Cmd Msg
@@ -14,13 +15,6 @@ getBudgets user =
   Http.get decodeBudgets (budgetsUrl user)
     |> Task.toResult
     |> Task.perform DisplayFail DisplayLoaded
-
-
-budgetsUrl : User -> String
-budgetsUrl user =
-  Http.url (user.apiBaseUrl ++ "budgets")
-    [ ("user_token", user.token),
-      ("user_email", user.email) ]
 
 
 decodeBudgets : Json.Decoder (List Budget)

@@ -38,6 +38,13 @@ deleteExpenseUrl user expenseId =
     Http.url baseUrl (authParams user)
 
 
+budgetsUrl : User -> String
+budgetsUrl user =
+  Http.url (user.apiBaseUrl ++ "budgets")
+    [ ("user_token", user.token),
+      ("user_email", user.email) ]
+
+
 authParams : User -> List (String, String)
 authParams user =
   [ ("user_token", user.token),

@@ -10,7 +10,9 @@ import Budgets.Rest exposing (..)
 
 initialModel : Model
 initialModel =
-  Model [] Nothing
+  { budgets = [],
+    currentBudgetId = Nothing,
+    nextBudgetId = -1 }
 
 
 update : User -> Msg -> Model -> (Model, Cmd Msg)
