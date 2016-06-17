@@ -11,11 +11,11 @@ import BudgetEditor.Types exposing (..)
 import BudgetEditor.Rest exposing (saveBudgets, deleteBudget)
 
 
-update : User -> Msg -> Model -> (Model, Cmd Msg)
+update : User -> Msg -> Model -> (Model, Cmd Msg, Bool)
 update user msg model =
   case msg of
     NoOp ->
-      (model, Cmd.none)
+      (model, Cmd.none, False)
 
     AddMore ->
       let
@@ -23,7 +23,8 @@ update user msg model =
       in
         ({ model | nextBudgetId = model.nextBudgetId - 1,
                    budgets = List.append model.budgets [newBudget] },
-        Cmd.none)
+        Cmd.none,
+        False)
 
     InputName id name ->
       let
@@ -34,7 +35,7 @@ update user msg model =
 
         budgets = List.map (modifyBudgetName id name) model.budgets
       in
-        ({ model | budgets = budgets }, Cmd.none)
+        ({ model | budgets = budgets }, Cmd.none, False)
 
     InputAmount id amount ->
       let
@@ -43,10 +44,10 @@ update user msg model =
 
         budgets = List.map (modifyBudgetAmount id amount) model.budgets
       in
-        ({ model | budgets = budgets }, Cmd.none)
+        ({ model | budgets = budgets }, Cmd.none, False)
 
     Save ->
-      (model, saveBudgets user model.budgets)
+      (model, saveBudgets user model.budgets, False)
 
     SaveOk result ->
       let
@@ -55,20 +56,20 @@ update user msg model =
           Just b -> b
           Nothing -> model.budgets
       in
-        ({ model | budgets = budgets }, Navigation.modifyUrl "#expenses")
+        ({ model | budgets = budgets }, Navigation.modifyUrl "#expenses", False)
 
     Delete budgetId ->
       let
         fx = if budgetId < 0 then Cmd.none else deleteBudget user budgetId
         budgets = List.filter (\b -> b.id /= budgetId) model.budgets
       in
-        ({ model | budgets = budgets }, fx)
+        ({ model | budgets = budgets }, fx, False)
 
     DeleteOk result ->
-      (model, Cmd.none)
+      (model, Cmd.none, False)
 
     Cancel ->
-      (model, Navigation.modifyUrl "#expenses")
+      (model, Navigation.modifyUrl "#expenses", True)
 
 
 emptyBudget : Int -> Budget

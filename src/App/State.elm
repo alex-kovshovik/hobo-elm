@@ -56,7 +56,7 @@ routeLoadCommands model =
       loadExpenseCommand model.user expenseId
 
     BudgetsRoute ->
-      loadBudgetsEffect model.user
+      loadBudgetsCommand model.user
 
     NotFoundRoute ->
       Cmd.none
@@ -65,7 +65,7 @@ routeLoadCommands model =
 afterUserCheckCommands : Model -> Cmd Msg
 afterUserCheckCommands model =
   if model.user.authenticated
-    then Cmd.batch [ loadBudgetsEffect model.user, routeLoadCommands model ]
+    then Cmd.batch [ loadBudgetsCommand model.user, routeLoadCommands model ]
     else Cmd.none
 
 
@@ -79,8 +79,8 @@ loadExpensesCommand user =
   getExpenses user 0 |> Cmd.map List
 
 
-loadBudgetsEffect : User -> Cmd Msg
-loadBudgetsEffect user =
+loadBudgetsCommand : User -> Cmd Msg
+loadBudgetsCommand user =
   getBudgets user |> Cmd.map Expenses.Types.BudgetList |> Cmd.map List
 
 
@@ -112,10 +112,16 @@ update msg model =
     BudgetEditor editorMsg ->
       let
         oldData = model.data
-        (buttons, fx) = BudgetEditor.State.update model.user editorMsg oldData.buttons
+        (buttons, fx, reloadBudgets) = BudgetEditor.State.update model.user editorMsg oldData.buttons
         data = { oldData | buttons = buttons }
+
+        reloadBudgetsFx = if reloadBudgets then loadBudgetsCommand model.user else Cmd.none
+        allFx = Cmd.batch [
+          Cmd.map BudgetEditor fx,
+          reloadBudgetsFx
+        ]
       in
-        ({ model | data = data }, Cmd.map BudgetEditor fx)
+        ({ model | data = data }, allFx)
 
     UserCheckOk result ->
       let
