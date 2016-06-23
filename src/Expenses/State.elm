@@ -2,6 +2,7 @@
 module Expenses.State exposing(initialState, update)
 
 import Navigation
+import String
 
 import Ports exposing (amountClick)
 
@@ -30,7 +31,7 @@ update user msg model =
         buttons = model.buttons
         newButtons = { buttons | currentBudgetId = Nothing }
       in
-        ({ model | buttons = newButtons, amount = amount }, Cmd.none)
+        ({ model | buttons = newButtons, amount = String.split "." amount |> String.join "" }, Cmd.none)
 
     AmountClick ->
       (model, amountClick "Fuck yeah!")

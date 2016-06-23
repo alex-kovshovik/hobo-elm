@@ -90,10 +90,10 @@ viewExpenseForm model =
         span [ ] [ text (formatInputAmount model.amount) ],
         input [ id "amount-input",
                 type' "number",
-                step "0.01",
+                step "1",
                 name "amount",
                 value model.amount,
-                pattern "\\d*",
+                pattern "[0-9]*",
                 autocomplete False,
                 onInput AmountInput ] [ ]
       ]
