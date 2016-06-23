@@ -19,7 +19,7 @@ emptyExpense =
   let
     pohDate = Time.millisecond |> Date.fromTime
   in
-    Expenses.Expense 0 0 "" "" 0.0 "" pohDate False
+    Expenses.Expense 0 0 "" "" 0.0 "" pohDate
 
 initialState : Model
 initialState =

@@ -28,39 +28,36 @@ button:disabled {
 }
 
 /**
- * Footer Styles
+ * Helpers
  */
-.footer {
-  position:fixed;
-  top:calc( 100% - 54px );
-  height:54px;
-  width:100%;
-  background-color: #efefef;
-  text-align: center;
-  padding: 16px;
+
+.tac {
+   text-align: center;
+ }
+
+.tar {
+  text-align: right;
 }
 
 .mt1 {
   margin-top: 24px;
 }
 
+.mt2 {
+  margin-top: 48px;
+}
+
+.mb1 {
+  margin-bottom: 24px;
+}
+
+.mb05 {
+  margin-bottom: 12px;
+}
+
 /**
  * Budget buttons
  */
-
-div.bb-cell {
-  padding-left: 3px;
-  padding-right: 3px;
-}
-
-div.bb-cell:first-child {
-  padding-left: 15px;
-}
-
-div.bb-cell:last-child {
-  padding-right: 15px;
-}
-
 div.bb {
   border: 1px solid #d7d7d7;
   border-radius: 3px;

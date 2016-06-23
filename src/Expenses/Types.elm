@@ -15,8 +15,7 @@ type alias Expense = {
   createdByName: String,
   amount : Float,
   comment : String,
-  createdAt : Date,
-  clicked : Bool
+  createdAt : Date
 }
 
 type alias ExpenseList = List Expense
@@ -24,7 +23,6 @@ type alias ExpenseList = List Expense
 type alias Model = {
   buttons : Budgets.Model,
   expenses : ExpenseList,
-  nextExpenseId : Int,
   weekNumber: Int, -- relative number of week, 0 (zero) means current
 
   -- form
@@ -36,10 +34,7 @@ type Msg
   | BudgetList Budgets.Msg
 
   -- adding/removing expenses
-  | RequestAdd
-  | RequestRemove Expense
   | UpdateAdded (Result (Error Expense) (Response Expense))
-  | UpdateRemoved (Result (Error Expense) (Response Expense))
 
   -- showing/editing expenses
   | Show Expense

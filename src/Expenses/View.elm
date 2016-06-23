@@ -25,16 +25,10 @@ root user model =
 
   in
     div [ ] [
-      viewBudgets user model.expenses model,
       viewExpenseForm model,
-
-      div [ class "clear" ] [
-        weekHeader model expensesTotal
-      ],
-
-      div [ class "clear" ] [
-        viewExpenseList expenses expensesTotal
-      ]
+      viewBudgets user model.expenses model,
+      weekHeader model expensesTotal,
+      viewExpenseList expenses expensesTotal
     ]
 
 
@@ -66,7 +60,7 @@ expenseItem expense =
 
 viewExpenseList : List Expense -> String -> Html Msg
 viewExpenseList filteredExpenses totalString =
-  div [ class "clear col-12 push-2-tablet push-3-desktop push-3-hd col-8-tablet col-6-desktop col-5-hd" ] [
+  div [ class "clear col-12 mt1" ] [
     table [ ] [
       tbody [ ] (List.map expenseItem filteredExpenses),
       tfoot [ ] [
@@ -83,28 +77,23 @@ viewExpenseList filteredExpenses totalString =
 
 viewExpenseForm : Model -> Html Msg
 viewExpenseForm model =
-  div [ class "clear" ] [
-    div [ class "field-group" ] [
-      div [ class "col-8" ] [
-        input [ class "field",
-                type' "number",
-                id "amount",
-                name "amount",
-                value model.amount,
-                placeholder "Amount",
-                autocomplete False,
-                onInput AmountInput ] [ ]
-      ],
-      div [ class "col-4" ] [
-        button [ class "button week-button", onClick RequestAdd, disabled (model.buttons.currentBudgetId == Nothing || model.amount == "") ] [ text "Add" ]
-      ]
+  div [ class "clear field-group" ] [
+    div [ class "col-12" ] [
+      input [ class "field",
+              type' "number",
+              id "amount",
+              name "amount",
+              value model.amount,
+              placeholder "Amount",
+              autocomplete False,
+              onInput AmountInput ] [ ]
     ]
   ]
 
 
 viewBudgets : User -> List Expense -> Model -> Html Msg
 viewBudgets user expenses model =
-  Html.App.map BudgetList (Budgets.root user model.weekNumber expenses model.buttons)
+  map BudgetList (Budgets.root user model.weekNumber expenses model.buttons)
 
 
 weekHeader : Model -> String -> Html Msg
@@ -116,7 +105,7 @@ weekHeader model total =
 
     rightDisabledClass = if model.weekNumber == 0 then " disabled" else ""
   in
-    div [ class "clear" ] [
+    div [ class "clear mt2" ] [
       div [ class "col-3 col-1-hd" ] [
         button [ class "button week-button", onClick LoadPreviousWeek ] [ text "<<" ]
       ],
@@ -127,10 +116,3 @@ weekHeader model total =
         button [ class ("button week-button" ++ rightDisabledClass), onClick LoadNextWeek ] [ text ">>" ]
       ]
     ]
-
-
-viewExpense : User -> Model -> Html Msg
-viewExpense user model =
-  div [ ] [
-    text "It works!"
-  ]

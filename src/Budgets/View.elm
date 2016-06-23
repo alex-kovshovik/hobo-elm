@@ -13,11 +13,11 @@ import Budgets.Button.View as BudgetButton
 
 root : User -> Int -> List Expense -> Model -> Html Msg
 root user weekNumber expenses model =
-  div [ class "clear" ] (List.map (budgetButton user weekNumber expenses model) model.budgets)
+  div [ class "clear mt1" ] (List.map (budgetButton user weekNumber expenses model) model.budgets)
 
 
 budgetButton: User -> Int -> List Expense -> Model -> Budget -> Html Msg
 budgetButton user weekNumber expenses model budget =
-  div [ class "col-3 bb-cell" ] [
+  div [ class "col-4 mb05" ] [
     BudgetButton.root user weekNumber model.currentBudgetId (onClick (Toggle budget.id)) budget expenses
   ]

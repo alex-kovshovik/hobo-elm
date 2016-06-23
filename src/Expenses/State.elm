@@ -8,6 +8,7 @@ import Types exposing (..)
 import Expenses.Types exposing (..)
 import Expenses.Rest exposing (..)
 import Budgets.State as Budgets
+import Budgets.Types exposing (BudgetId)
 
 import Utils.Numbers exposing (toFloatPoh)
 import Utils.Parsers exposing (resultToObject)
@@ -15,34 +16,56 @@ import Utils.Parsers exposing (resultToObject)
 
 initialState : Model
 initialState =
-  Model Budgets.initialModel [] 2 0 ""
+  { buttons = Budgets.initialModel,
+    expenses = [],
+    weekNumber = 0,
+    amount = "" }
+
+
+getNewExpenseCmd : User -> Float -> BudgetId -> Cmd Expenses.Types.Msg
+getNewExpenseCmd user amount budgetId =
+  let
+    newExpense =
+      {
+        id = 0,
+        budgetId = budgetId,
+        budgetName = "",
+        createdByName = "",
+        amount = amount,
+        comment = "",
+        createdAt = Date.fromTime 0
+      }
+  in
+    addExpense user newExpense
 
 
 update : User -> Msg -> Model -> (Model, Cmd Msg)
 update user msg model =
   case msg of
     AmountInput amount ->
-      ({ model | amount = amount }, Cmd.none)
+      let
+        buttons = model.buttons
+        newButtons = { buttons | currentBudgetId = Nothing }
+      in
+        ({ model | buttons = newButtons, amount = amount }, Cmd.none)
 
     BudgetList bblAction ->
       let
-        (buttonData, fx) = Budgets.update user bblAction model.buttons
-      in
-        ({ model | buttons = buttonData }, Cmd.map BudgetList fx)
+        (buttonData, bblCmd, (addNew, budgetId)) = Budgets.update user bblAction model.buttons
+        floatAmount = toFloatPoh model.amount
 
-    -- adding/removing expenses
-    RequestAdd ->
-      let
-        budgetId = Maybe.withDefault -1 model.buttons.currentBudgetId
-        newExpense = Expense 0 budgetId "" "" (toFloatPoh model.amount) "" (Date.fromTime 0) False
-      in
-        ({ model | amount = "" }, addExpense user newExpense)
+        (newAmount, addExpenseCmd) =
+          if addNew && floatAmount > 0.0
+            then ("", getNewExpenseCmd user floatAmount budgetId)
+            else (model.amount, Cmd.none)
 
-    RequestRemove expense ->
-      let
-        newExpenses = List.filter (\ex -> ex.id /= expense.id) model.expenses
+        cmd = Cmd.batch [
+          Cmd.map BudgetList bblCmd,
+          addExpenseCmd
+        ]
+
       in
-        ({ model | expenses = newExpenses}, Cmd.none)
+        ({ model | amount = newAmount, buttons = buttonData }, cmd)
 
     UpdateAdded expenseResult ->
       let
@@ -50,18 +73,11 @@ update user msg model =
         newExpenses = case newExpense of
           Just expense -> expense :: model.expenses
           Nothing -> model.expenses
-      in
-        ({ model | expenses = newExpenses}, Cmd.none)
 
-    UpdateRemoved expenseResult ->
-      let
-        deletedExpense = resultToObject expenseResult
-
-        newExpenses = case deletedExpense of
-          Just expense -> List.filter (\e -> e.id /= expense.id) model.expenses
-          Nothing -> model.expenses
+        buttons = model.buttons
+        newButtons = { buttons | currentBudgetId = Nothing }
       in
-        ({ model | expenses = newExpenses }, Cmd.none)
+        ({ model | buttons = newButtons, expenses = newExpenses}, Cmd.none)
 
     -- showing/editing expenses
     Show expense ->

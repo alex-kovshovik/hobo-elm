@@ -78,4 +78,4 @@ convertDecoding id budgetId budgetName createdByName amount comment createdAtStr
                   Ok date -> date
                   Err error -> Date.fromTime 0
   in
-    Expense id budgetId budgetName createdByName (toFloatPoh amount) comment createdAt False
+    Expense id budgetId budgetName createdByName (toFloatPoh amount) comment createdAt

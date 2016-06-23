@@ -15,22 +15,23 @@ import Routes exposing (..)
 
 root : Model -> Html Msg
 root model =
-  div [ class "container"] [
-    div [ class "mt1" ] [
-      div [ class "col-6" ] [
-        text ("Welcome " ++ model.user.email)
-      ],
-      div [ class "col-6", style [("text-align", "right")] ] [
-        a [ onClick EditBudgets ] [ text "Budgets" ],
-        text " | ",
-        a [ onClick Logout ] [ text "Logout" ]
-      ],
-      br [ ] [ ],
-      br [ ] [ ]
+  div [ class "container-full mt1"] [
+    header model,
+    pages model
+  ]
+
+
+header : Model -> Html Msg
+header model =
+  div [ class "clear mb1" ] [
+    div [ class "col-6" ] [
+      text ("Welcome " ++ model.user.email)
     ],
 
-    div [ ] [
-      pages model
+    div [ class "col-6 tar" ] [
+      a [ onClick EditBudgets ] [ text "Budgets" ],
+      text " | ",
+      a [ onClick Logout ] [ text "Logout" ]
     ]
   ]
 

@@ -1,5 +1,5 @@
 // pull in desired CSS/SASS files
-require('./styles/base.css')
+require('./styles/styles.css')
 require('./styles/hobo.scss')
 require('font-awesome-webpack')
 
@@ -24,7 +24,7 @@ class HoboJs {
 
     elmApp.ports.logout.subscribe(function(message) {
       console.log("Logout message", message)
-      
+
       window.localStorage.clear()
       window.location.reload()
     })

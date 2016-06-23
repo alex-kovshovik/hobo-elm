@@ -15,22 +15,23 @@ initialModel =
     nextBudgetId = -1 }
 
 
-update : User -> Msg -> Model -> (Model, Cmd Msg)
+update : User -> Msg -> Model -> (Model, Cmd Msg, (Bool, BudgetId))
 update user msg model =
   case msg of
     Toggle id ->
       let
-        currentBudgetId = if Just id == model.currentBudgetId
-                            then Nothing
-                            else Just id
+        (budgetId, addNew) =
+          if Just id == model.currentBudgetId
+            then (Nothing, False)
+            else (Just id, True)
       in
-        ({ model | currentBudgetId = currentBudgetId }, Cmd.none)
+        ({ model | currentBudgetId = budgetId }, Cmd.none, (addNew, id))
 
     Request ->
-      (model, getBudgets user)
+      (model, getBudgets user, (False, 0))
 
     DisplayLoaded budgetsResult ->
-      ({ model | budgets = resultToList budgetsResult }, Cmd.none)
+      ({ model | budgets = resultToList budgetsResult }, Cmd.none, (False, 0))
 
     DisplayFail budgetsResult ->
-      ({ model | budgets = [] }, Cmd.none)
+      ({ model | budgets = [] }, Cmd.none, (False, 0))
