@@ -85,6 +85,7 @@ viewExpenseForm model =
                 name "amount",
                 value model.amount,
                 pattern "[0-9]*",
+                placeholder "Apple's Safari sucks!",
                 autocomplete False,
                 onInput AmountInput ] [ ]
       ]
