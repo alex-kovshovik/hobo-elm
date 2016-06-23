@@ -1,7 +1,6 @@
 -- TODO: refactor to Expenses/List & Expenses/Edit
 module Expenses.State exposing(initialState, update)
 
-import String
 import Navigation
 
 import Ports exposing (amountClick)
