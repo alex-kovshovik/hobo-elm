@@ -20,6 +20,12 @@ a {
   cursor: pointer;
 }
 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /**
  * Form
  */
@@ -32,6 +38,7 @@ button:disabled {
   font-size: 2em;
   line-height: 2em;
   border-bottom: 2px solid #d7d7d7;
+  cursor: text;
 
   span {
     margin-left: 5px;
