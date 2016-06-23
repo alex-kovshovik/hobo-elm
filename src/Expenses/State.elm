@@ -1,14 +1,15 @@
 -- TODO: refactor to Expenses/List & Expenses/Edit
 module Expenses.State exposing(initialState, update)
 
+import String
 import Navigation
-import Date exposing (Date)
-import Types exposing (..)
 
+import Ports exposing (amountClick)
+
+import Types exposing (..)
 import Expenses.Types exposing (..)
 import Expenses.Rest exposing (..)
 import Budgets.State as Budgets
-import Budgets.Types exposing (BudgetId)
 
 import Utils.Numbers exposing (toFloatPoh)
 import Utils.Parsers exposing (resultToObject)
@@ -22,23 +23,6 @@ initialState =
     amount = "" }
 
 
-getNewExpenseCmd : User -> Float -> BudgetId -> Cmd Expenses.Types.Msg
-getNewExpenseCmd user amount budgetId =
-  let
-    newExpense =
-      {
-        id = 0,
-        budgetId = budgetId,
-        budgetName = "",
-        createdByName = "",
-        amount = amount,
-        comment = "",
-        createdAt = Date.fromTime 0
-      }
-  in
-    addExpense user newExpense
-
-
 update : User -> Msg -> Model -> (Model, Cmd Msg)
 update user msg model =
   case msg of
@@ -49,10 +33,13 @@ update user msg model =
       in
         ({ model | buttons = newButtons, amount = amount }, Cmd.none)
 
+    AmountClick ->
+      (model, amountClick "Fuck yeah!")
+
     BudgetList bblAction ->
       let
         (buttonData, bblCmd, (addNew, budgetId)) = Budgets.update user bblAction model.buttons
-        floatAmount = toFloatPoh model.amount
+        floatAmount = (toFloatPoh model.amount) / 100.0 -- UI now renders hidden input
 
         (newAmount, addExpenseCmd) =
           if addNew && floatAmount > 0.0

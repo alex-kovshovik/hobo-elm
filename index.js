@@ -23,10 +23,13 @@ class HoboJs {
     const elmApp = Elm.Main.embed(document.getElementById('main'), auth)
 
     elmApp.ports.logout.subscribe(function(message) {
-      console.log("Logout message", message)
-
       window.localStorage.clear()
       window.location.reload()
+    })
+
+    elmApp.ports.amountClick.subscribe(function(message) {
+      const amountInput = document.getElementById("amount-input")
+      amountInput.focus()
     })
   }
 

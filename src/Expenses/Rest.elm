@@ -1,4 +1,4 @@
-module Expenses.Rest exposing (getExpenses, addExpense)
+module Expenses.Rest exposing (getExpenses, getNewExpenseCmd)
 
 import Http
 import HttpBuilder exposing (..)
@@ -10,6 +10,7 @@ import Date
 import Urls exposing (..)
 import Types exposing (..)
 import Expenses.Types exposing (..)
+import Budgets.Types exposing (BudgetId)
 
 import Utils.Numbers exposing (toFloatPoh, formatAmount)
 
@@ -20,6 +21,23 @@ getExpenses user weekNumber =
     |> send (jsonReader decodeExpenses) (jsonReader decodeExpenses)
     |> Task.toResult
     |> Task.perform UpdateList UpdateList
+
+
+getNewExpenseCmd : User -> Float -> BudgetId -> Cmd Expenses.Types.Msg
+getNewExpenseCmd user amount budgetId =
+  let
+    newExpense =
+      {
+        id = 0,
+        budgetId = budgetId,
+        budgetName = "",
+        createdByName = "",
+        amount = amount,
+        comment = "",
+        createdAt = Date.fromTime 0
+      }
+  in
+    addExpense user newExpense
 
 
 addExpense : User -> Expense -> Cmd Msg

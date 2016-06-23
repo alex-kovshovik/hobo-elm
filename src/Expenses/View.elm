@@ -6,13 +6,14 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Date
 import String
+import Numeral
 
 import Types exposing (..)
 import Expenses.Types exposing (..)
 import Budgets.View as Budgets
 
 import Utils.Expenses exposing (getTotal)
-import Utils.Numbers exposing (formatAmount)
+import Utils.Numbers exposing (formatAmount, toFloatPoh)
 
 
 root : User -> Model -> Html Msg
@@ -75,18 +76,27 @@ viewExpenseList filteredExpenses totalString =
   ]
 
 
+
+formatInputAmount : String -> String
+formatInputAmount amount =
+  Numeral.format "0,0.00" (toFloatPoh amount / 100.0)
+
 viewExpenseForm : Model -> Html Msg
 viewExpenseForm model =
-  div [ class "clear field-group" ] [
+  div [ class "clear" ] [
     div [ class "col-12" ] [
-      input [ class "field",
-              type' "number",
-              id "amount",
-              name "amount",
-              value model.amount,
-              placeholder "Amount",
-              autocomplete False,
-              onInput AmountInput ] [ ]
+      div [ id "amount", onClick AmountClick ] [
+        text "$",
+        span [ ] [ text (formatInputAmount model.amount) ],
+        input [ id "amount-input",
+                type' "number",
+                step "0.01",
+                name "amount",
+                value model.amount,
+                pattern "\\d*",
+                autocomplete False,
+                onInput AmountInput ] [ ]
+      ]
     ]
   ]
 
