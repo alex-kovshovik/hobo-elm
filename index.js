@@ -36,7 +36,6 @@ class HoboJs {
 
         $amountInput.on('touchstart', function () {
           $(this).focus()
-          console.log("Focused!")
         })
       }
     }, 100);
