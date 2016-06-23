@@ -31,7 +31,6 @@ type alias Model = {
 
 type Msg
   = AmountInput String
-  | AmountClick
   | BudgetList Budgets.Msg
 
   -- adding/removing expenses

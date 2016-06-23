@@ -4,8 +4,6 @@ module Expenses.State exposing(initialState, update)
 import Navigation
 import String
 
-import Ports exposing (amountClick)
-
 import Types exposing (..)
 import Expenses.Types exposing (..)
 import Expenses.Rest exposing (..)
@@ -32,9 +30,6 @@ update user msg model =
         newButtons = { buttons | currentBudgetId = Nothing }
       in
         ({ model | buttons = newButtons, amount = String.split "." amount |> String.join "" }, Cmd.none)
-
-    AmountClick ->
-      (model, amountClick "Fuck yeah!")
 
     BudgetList bblAction ->
       let

@@ -17,6 +17,29 @@ class HoboJs {
     } else {
       this.showFacebookLogin()
     }
+
+    // FUCK YOU APPLE!
+    // This interval only exists because of you, motherfuckers!
+    // Your goddamn mobile safari browser refuses to act on JavaScript's "focus"
+    // calls, unless they are caused by touch event.
+    setInterval(function() {
+      const $amount = $('#amount')
+      const $amountInput = $('#amount-input')
+
+      if ($amount.length > 0 && $amountInput.length > 0) {
+        $amount.off('click')
+        $amountInput.off('touchstart')
+
+        $amount.on('click', function () {
+          $amountInput.trigger('touchstart')
+        })
+
+        $amountInput.on('touchstart', function () {
+          $(this).focus()
+          console.log("Focused!")
+        })
+      }
+    }, 100);
   }
 
   embedElmApp (auth) {
@@ -25,11 +48,6 @@ class HoboJs {
     elmApp.ports.logout.subscribe(function(message) {
       window.localStorage.clear()
       window.location.reload()
-    })
-
-    elmApp.ports.amountClick.subscribe(function(message) {
-      const amountInput = document.getElementById("amount-input")
-      amountInput.focus()
     })
   }
 

@@ -6,7 +6,6 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Date
 import String
-import Numeral
 
 import Types exposing (..)
 import Expenses.Types exposing (..)
@@ -76,18 +75,12 @@ viewExpenseList filteredExpenses totalString =
   ]
 
 
-
-formatInputAmount : String -> String
-formatInputAmount amount =
-  Numeral.format "0,0.00" (toFloatPoh amount / 100.0)
-
 viewExpenseForm : Model -> Html Msg
 viewExpenseForm model =
   div [ class "clear" ] [
     div [ class "col-12" ] [
-      div [ id "amount", onClick AmountClick ] [
-        text "$",
-        span [ ] [ text (formatInputAmount model.amount) ],
+      div [ id "amount" ] [
+        span [ ] [ text (formatAmount ((model.amount |> toFloatPoh) / 100.0)) ],
         input [ id "amount-input",
                 type' "number",
                 step "1",
