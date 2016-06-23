@@ -43,16 +43,14 @@ expenseItemLinkText expense =
 
 expenseItem : Expense -> Html Msg
 expenseItem expense =
-  tr [ ] [
+  tr [ style [("cursor", "pointer")], onClick (Show expense) ] [
     td [ ] [
       span [ class "date" ] [
         div [ class "date-header" ] [ text (Date.month expense.createdAt |> toString) ],
         div [ class "date-day" ] [ text (Date.day expense.createdAt |> toString) ]
       ]
     ],
-    td [ ] [
-      a [ onClick (Show expense) ] [ text (expenseItemLinkText expense) ]
-    ],
+    td [ ] [ text (expenseItemLinkText expense) ],
     td [ ] [ text expense.createdByName ],
     td [ class "text-right" ] [ text (formatAmount expense.amount) ]
   ]
