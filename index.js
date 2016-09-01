@@ -120,7 +120,7 @@ class HoboJs {
     const auth = this.getAuth()
 
     auth.email = authData.user.email
-    auth.token = authData.user.authentication_token
+    auth.token = authData.user.api_key
     auth.authenticated = true
 
     this.setAuth(auth)

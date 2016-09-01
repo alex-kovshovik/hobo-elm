@@ -17,6 +17,7 @@ loadExpense : User -> ExpenseId -> Cmd Msg
 loadExpense user expenseId =
   get (expenseUrl user expenseId)
     |> withHeader "Content-Type" "application/json"
+    |> withAuthHeader user
     |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
     |> Task.toResult
     |> Task.perform LoadFail LoadOk
@@ -34,6 +35,7 @@ updateExpense user expense =
   in
     patch (editExpenseUrl user expense.budgetId expense.id)
       |> withHeader "Content-Type" "application/json"
+      |> withAuthHeader user
       |> withJsonBody expenseJson
       |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
       |> Task.toResult
@@ -43,6 +45,8 @@ updateExpense user expense =
 deleteExpense : User -> ExpenseId -> Cmd Msg
 deleteExpense user expenseId =
   delete (deleteExpenseUrl user expenseId)
+    |> withHeader "Content-Type" "application/json"
+    |> withAuthHeader user
     |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
     |> Task.toResult
     |> Task.perform DeleteOk DeleteOk

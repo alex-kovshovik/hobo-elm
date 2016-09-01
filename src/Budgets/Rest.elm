@@ -1,20 +1,23 @@
 module Budgets.Rest exposing (getBudgets, decodeBudgets)
 
 import Task
-import Http
+import HttpBuilder exposing (..)
 import Json.Decode as Json exposing((:=))
 import Utils.Numbers exposing (toFloatPoh)
 
 import Types exposing (..)
 import Budgets.Types exposing (..)
-import Urls exposing (budgetsUrl)
+import Urls exposing (..)
 
 
 getBudgets : User -> Cmd Msg
 getBudgets user =
-  Http.get decodeBudgets (budgetsUrl user)
+  get (budgetsUrl user)
+    |> withHeader "Content-Type" "application/json"
+    |> withAuthHeader user
+    |> send (jsonReader decodeBudgets) (jsonReader decodeBudgets)
     |> Task.toResult
-    |> Task.perform DisplayFail DisplayLoaded
+    |> Task.perform DisplayLoaded DisplayLoaded
 
 
 decodeBudgets : Json.Decoder (List Budget)

@@ -4,6 +4,7 @@ import HttpBuilder exposing (..)
 import Json.Encode
 import Task
 
+import Urls exposing (withAuthHeader)
 import Types exposing (..)
 import Budgets.Types exposing (Budget, BudgetId)
 import Budgets.Rest exposing (decodeBudgets)
@@ -15,6 +16,7 @@ saveBudgets : User -> List Budget -> Cmd Msg
 saveBudgets user budgets =
   post (budgetsUrl user)
     |> withHeader "Content-Type" "application/json"
+    |> withAuthHeader user
     |> withJsonBody (encodeBudgets budgets)
     |> send (jsonReader decodeBudgets) (jsonReader decodeBudgets)
     |> Task.toResult
@@ -25,6 +27,7 @@ deleteBudget : User -> BudgetId -> Cmd Msg
 deleteBudget user budgetId =
   delete (deleteBudgetUrl user budgetId)
     |> withHeader "Content-Type" "application/json"
+    |> withAuthHeader user
     |> send stringReader stringReader
     |> Task.toResult
     |> Task.perform DeleteOk DeleteOk

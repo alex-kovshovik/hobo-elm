@@ -1,6 +1,6 @@
 module Budgets.State exposing (..)
 
-import Utils.Parsers exposing (resultToList)
+import Utils.Parsers exposing (resultToObject)
 
 import Types exposing (..)
 import Budgets.Types exposing (..)
@@ -31,7 +31,10 @@ update user msg model =
       (model, getBudgets user, (False, 0))
 
     DisplayLoaded budgetsResult ->
-      ({ model | budgets = resultToList budgetsResult }, Cmd.none, (False, 0))
-
-    DisplayFail budgetsResult ->
-      ({ model | budgets = [] }, Cmd.none, (False, 0))
+      let
+        budgetsObject = resultToObject budgetsResult
+        budgets = case budgetsObject of
+          Just list -> list
+          Nothing -> []
+      in
+        ({ model | budgets = budgets }, Cmd.none, (False, 0))

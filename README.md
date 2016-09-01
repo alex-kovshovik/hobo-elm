@@ -6,7 +6,7 @@ Use for free... for now: http://hoboapp.com
 
 ## Build and run
 
-- Install Elm 0.17
+- Install Elm 0.17.1
 - Install NodeJS (I use version 6.2.0 and NPM version 3.9.3, with different versions - YMMV)
 - `npm i`
 - `npm start`
@@ -17,6 +17,12 @@ Use for free... for now: http://hoboapp.com
 - Ready to play: http://localhost:8080
 
 ## Change log
+
+## September 1, 2016
+
+- Upgrade backend to Rails version 5!
+- Change authentication to token auth via headers
+- Upgrade elm to latest version 0.17.1
 
 ### June 17, 2016
 

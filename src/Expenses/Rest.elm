@@ -18,6 +18,7 @@ getExpenses : User -> Int -> Cmd Msg
 getExpenses user weekNumber =
   get (expensesUrl user weekNumber)
     |> withHeader "Content-Type" "application/json"
+    |> withAuthHeader user
     |> send (jsonReader decodeExpenses) (jsonReader decodeExpenses)
     |> Task.toResult
     |> Task.perform UpdateList UpdateList
@@ -51,6 +52,7 @@ addExpense user expense =
   in
     post (newExpenseUrl user expense.budgetId)
       |> withHeader "Content-Type" "application/json"
+      |> withAuthHeader user
       |> withJsonBody expenseJson
       |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
       |> Task.toResult
@@ -60,7 +62,7 @@ addExpense user expense =
 expensesUrl : User -> Int -> String
 expensesUrl user weekNumber =
   let
-    params = ("week", toString weekNumber)::(authParams user)
+    params = [("week", toString weekNumber)]
   in
     Http.url (user.apiBaseUrl ++ "expenses") params
 

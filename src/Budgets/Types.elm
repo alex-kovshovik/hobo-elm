@@ -1,6 +1,6 @@
 module Budgets.Types exposing (..)
 
-import Http exposing(Error)
+import HttpBuilder exposing (Error, Response)
 import Types exposing(..)
 
 type alias BudgetId = RecordId
@@ -11,6 +11,8 @@ type alias Budget = {
   amount : Float
 }
 
+type alias BudgetList = List Budget
+
 type alias Model = {
   budgets : List Budget,
   currentBudgetId : Maybe RecordId, -- one or none can be selected.
@@ -20,5 +22,4 @@ type alias Model = {
 type Msg
   = Toggle BudgetId
   | Request
-  | DisplayLoaded (Result Error (List Budget))
-  | DisplayFail (Result Error (List Budget))
+  | DisplayLoaded (Result (Error BudgetList) (Response BudgetList))
