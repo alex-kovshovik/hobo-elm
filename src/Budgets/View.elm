@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Types exposing (..)
 import Budgets.Types exposing (..)
-import Expenses.Types exposing (Expense)
+import Expenses.List.Types exposing (Expense)
 import Budgets.Button.View as BudgetButton
 
 

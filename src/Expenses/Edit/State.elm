@@ -1,4 +1,4 @@
-module Expense.State exposing (initialState, update)
+module Expenses.Edit.State exposing (initialState, update)
 
 import Navigation
 import Time
@@ -6,9 +6,9 @@ import Date
 import Platform.Cmd exposing (map)
 import Utils.Parsers exposing (resultToObject)
 import Types exposing (..)
-import Expense.Types exposing (..)
-import Expenses.Types as Expenses
-import Expense.Rest exposing (..)
+import Expenses.List.Types as Expenses
+import Expenses.Edit.Types exposing (..)
+import Expenses.Edit.Rest exposing (..)
 
 
 emptyExpense : Expenses.Expense

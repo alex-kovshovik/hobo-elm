@@ -3,8 +3,8 @@ module App.Types exposing (..)
 import HttpBuilder exposing (..)
 import Routes exposing (Route)
 import Types exposing (..)
-import Expenses.Types as Expenses
-import Expense.Types as Expense
+import Expenses.List.Types as Expenses
+import Expenses.Edit.Types as Expense
 import BudgetEditor.Types
 
 

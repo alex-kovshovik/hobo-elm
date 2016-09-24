@@ -1,4 +1,4 @@
-module Expense.View exposing (root)
+module Expenses.Edit.View exposing (root)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -6,7 +6,7 @@ import Html.Events exposing (onClick, onInput)
 import Date.Format exposing (format)
 import Utils.Numbers exposing (formatAmount)
 import Types exposing (..)
-import Expense.Types exposing (..)
+import Expenses.Edit.Types exposing (..)
 
 
 root : User -> Model -> Html Msg

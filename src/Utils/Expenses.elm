@@ -1,6 +1,6 @@
 module Utils.Expenses exposing (getTotal)
 
-import Expenses.Types exposing (Expense)
+import Expenses.List.Types exposing (Expense)
 
 
 getTotal : List Expense -> Float

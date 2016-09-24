@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import String
 import Types exposing (..)
 import Budgets.Types exposing (..)
-import Expenses.Types exposing (Expense)
+import Expenses.List.Types exposing (Expense)
 import Utils.Numbers exposing (formatAmountRound)
 import Utils.Expenses exposing (getTotal)
 

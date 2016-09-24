@@ -1,13 +1,10 @@
--- TODO: refactor to Expenses/List & Expenses/Edit
-
-
-module Expenses.State exposing (initialState, update)
+module Expenses.List.State exposing (initialState, update)
 
 import Navigation
 import String
 import Types exposing (..)
-import Expenses.Types exposing (..)
-import Expenses.Rest exposing (..)
+import Expenses.List.Types exposing (..)
+import Expenses.List.Rest exposing (..)
 import Budgets.State as Budgets
 import Utils.Numbers exposing (toFloatPoh)
 import Utils.Parsers exposing (resultToObject)

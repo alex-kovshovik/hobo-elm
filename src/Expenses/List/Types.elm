@@ -1,4 +1,4 @@
-module Expenses.Types exposing (..)
+module Expenses.List.Types exposing (..)
 
 import Date exposing (Date)
 import HttpBuilder exposing (Error, Response)

@@ -1,7 +1,7 @@
-module Expense.Types exposing (..)
+module Expenses.Edit.Types exposing (..)
 
 import HttpBuilder exposing (Error, Response)
-import Expenses.Types exposing (Expense)
+import Expenses.List.Types exposing (Expense)
 
 
 type Msg

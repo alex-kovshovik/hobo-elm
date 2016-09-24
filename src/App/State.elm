@@ -4,13 +4,13 @@ import Navigation
 import Types exposing (..)
 import App.Types exposing (..)
 import App.Rest exposing (checkUser)
-import Expense.Rest exposing (loadExpense)
-import Expenses.Rest exposing (getExpenses)
+import Expenses.Edit.Rest exposing (loadExpense)
+import Expenses.List.Rest exposing (getExpenses)
 import Budgets.Rest exposing (getBudgets)
-import Expenses.State
-import Expense.State
+import Expenses.List.State
+import Expenses.Edit.State
 import BudgetEditor.State
-import Expenses.Types exposing (Expense, ExpenseId)
+import Expenses.List.Types exposing (Expense, ExpenseId)
 import Routes exposing (..)
 import Ports exposing (logout)
 import Utils.Parsers exposing (resultToObject)
@@ -29,10 +29,10 @@ initialState : Maybe HoboAuth -> Route -> ( Model, Cmd Msg )
 initialState auth route =
     let
         data =
-            Expenses.State.initialState
+            Expenses.List.State.initialState
 
         editData =
-            Expense.State.initialState
+            Expenses.Edit.State.initialState
 
         defaultUser =
             User "" "" False "" 0.5 "USD"
@@ -89,7 +89,7 @@ loadExpensesCommand user =
 
 loadBudgetsCommand : User -> Cmd Msg
 loadBudgetsCommand user =
-    getBudgets user |> Cmd.map Expenses.Types.BudgetList |> Cmd.map List
+    getBudgets user |> Cmd.map Expenses.List.Types.BudgetList |> Cmd.map List
 
 
 
@@ -114,14 +114,14 @@ update msg model =
         List listMsg ->
             let
                 ( listData, fx ) =
-                    Expenses.State.update model.user listMsg model.data
+                    Expenses.List.State.update model.user listMsg model.data
             in
                 ( { model | data = listData }, Cmd.map List fx )
 
         Edit expenseMsg ->
             let
                 ( editData, fx ) =
-                    Expense.State.update model.user expenseMsg model.editData
+                    Expenses.Edit.State.update model.user expenseMsg model.editData
             in
                 ( { model | editData = editData }, Cmd.map Edit fx )
 

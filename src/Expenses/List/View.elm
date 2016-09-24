@@ -1,4 +1,4 @@
-module Expenses.View exposing (root)
+module Expenses.List.View exposing (root)
 
 import Html exposing (..)
 import Html.App exposing (map)
@@ -7,7 +7,7 @@ import Html.Events exposing (onClick, onInput)
 import Date
 import String
 import Types exposing (..)
-import Expenses.Types exposing (..)
+import Expenses.List.Types exposing (..)
 import Budgets.View as Budgets
 import Utils.Expenses exposing (getTotal)
 import Utils.Numbers exposing (formatAmount, toFloatPoh)

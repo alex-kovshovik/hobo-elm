@@ -1,5 +1,6 @@
-module Expense.Rest exposing (loadExpense, updateExpense, deleteExpense)
+module Expenses.List.Rest exposing (getExpenses, getNewExpenseCmd)
 
+import Http
 import HttpBuilder exposing (..)
 import Task
 import Json.Decode as Json exposing ((:=))
@@ -7,55 +8,74 @@ import Json.Encode
 import Date
 import Urls exposing (..)
 import Types exposing (..)
-import Expenses.Types exposing (Expense, ExpenseId)
-import Expense.Types exposing (..)
+import Expenses.List.Types exposing (..)
+import Budgets.Types exposing (BudgetId)
 import Utils.Numbers exposing (toFloatPoh, formatAmount)
 
 
-loadExpense : User -> ExpenseId -> Cmd Msg
-loadExpense user expenseId =
-    get (expenseUrl user expenseId)
+getExpenses : User -> Int -> Cmd Msg
+getExpenses user weekNumber =
+    get (expensesUrl user weekNumber)
         |> withHeader "Content-Type" "application/json"
         |> withAuthHeader user
-        |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
+        |> send (jsonReader decodeExpenses) (jsonReader decodeExpenses)
         |> Task.toResult
-        |> Task.perform LoadFail LoadOk
+        |> Task.perform UpdateList UpdateList
 
 
-updateExpense : User -> Expense -> Cmd Msg
-updateExpense user expense =
+getNewExpenseCmd : User -> Float -> BudgetId -> Cmd Expenses.List.Types.Msg
+getNewExpenseCmd user amount budgetId =
+    let
+        newExpense =
+            { id = 0
+            , budgetId = budgetId
+            , budgetName = ""
+            , createdByName = ""
+            , amount = amount
+            , comment = ""
+            , createdAt = Date.fromTime 0
+            }
+    in
+        addExpense user newExpense
+
+
+addExpense : User -> Expense -> Cmd Msg
+addExpense user expense =
     let
         expenseJson =
             Json.Encode.object
                 [ ( "expense"
                   , Json.Encode.object
                         [ ( "amount", Json.Encode.float expense.amount )
-                        , ( "comment", Json.Encode.string expense.comment )
                         ]
                   )
                 ]
     in
-        patch (editExpenseUrl user expense.budgetId expense.id)
+        post (newExpenseUrl user expense.budgetId)
             |> withHeader "Content-Type" "application/json"
             |> withAuthHeader user
             |> withJsonBody expenseJson
             |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
             |> Task.toResult
-            |> Task.perform UpdateFail UpdateOk
+            |> Task.perform UpdateAdded UpdateAdded
 
 
-deleteExpense : User -> ExpenseId -> Cmd Msg
-deleteExpense user expenseId =
-    delete (deleteExpenseUrl user expenseId)
-        |> withHeader "Content-Type" "application/json"
-        |> withAuthHeader user
-        |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
-        |> Task.toResult
-        |> Task.perform DeleteOk DeleteOk
+expensesUrl : User -> Int -> String
+expensesUrl user weekNumber =
+    let
+        params =
+            [ ( "week", toString weekNumber ) ]
+    in
+        Http.url (user.apiBaseUrl ++ "expenses") params
 
 
 
 -- DECODERS
+
+
+decodeExpenses : Json.Decoder (List Expense)
+decodeExpenses =
+    Json.at [ "expenses" ] (Json.list decodeExpenseFields)
 
 
 decodeExpense : Json.Decoder Expense
