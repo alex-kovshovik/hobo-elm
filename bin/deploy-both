@@ -1,0 +1,4 @@
+#!/bin/bash
+
+bin/deploy-production
+bin/deploy-staging
