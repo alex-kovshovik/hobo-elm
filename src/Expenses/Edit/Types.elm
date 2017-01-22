@@ -1,19 +1,19 @@
 module Expenses.Edit.Types exposing (..)
 
-import HttpBuilder exposing (Error, Response)
+import Http
 import Expenses.List.Types exposing (Expense)
 
 
 type Msg
-    = NoOp
-    | CommentInput String
-    | LoadOk (Result (Error Expense) (Response Expense))
-    | LoadFail (Result (Error Expense) (Response Expense))
+    = CommentInput String
+    | LoadOk Expense
+    | LoadFail Http.Error
     | Update
-    | UpdateOk (Result (Error Expense) (Response Expense))
-    | UpdateFail (Result (Error Expense) (Response Expense))
+    | UpdateOk Expense
+    | UpdateFail Http.Error
     | Delete
-    | DeleteOk (Result (Error Expense) (Response Expense))
+    | DeleteOk Expense
+    | DeleteFail Http.Error
     | Cancel
 
 

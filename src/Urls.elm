@@ -36,7 +36,7 @@ deleteBudgetUrl user budgetId =
     user.apiBaseUrl ++ "budgets/" ++ (toString budgetId)
 
 
-withAuthHeader : User -> (RequestBuilder -> RequestBuilder)
+withAuthHeader : User -> (RequestBuilder a -> RequestBuilder a)
 withAuthHeader user =
     let
         auth =

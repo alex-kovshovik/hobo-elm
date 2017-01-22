@@ -6,17 +6,20 @@ Use for free... for now: http://hoboapp.com
 
 ## Build and run
 
-- Install Elm 0.17.1
-- Install NodeJS (I use version 6.2.0 and NPM version 3.9.3, with different versions - YMMV)
-- `npm i`
-- `npm start`
+- Install Elm 0.18
+- Install NodeJS (I use version 7.4.0 and Yarn version 0.19.1, with different versions - YMMV)
+- `yarn install`
 - `elm package install` and agree to everything Evan asks!
 - **Change fbAppId in index.js to your own Facebook App ID**. You can create one for "localhost" here: https://developers.facebook.com/apps/
-- `npm start`
+- `yarn start`
 - Download, configure and run Rails backend: https://github.com/aspushkinus/hobo-rails
 - Ready to play: http://localhost:8080
 
 ## Change log
+
+## January 21, 2017
+
+- Upgrade Elm to version 0.18
 
 ## September 1, 2016
 

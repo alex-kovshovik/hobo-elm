@@ -1,7 +1,7 @@
 module Routes exposing (..)
 
 import String
-import Navigation
+import Navigation exposing (Location)
 import UrlParser exposing (..)
 import Expenses.List.Types exposing (ExpenseId)
 
@@ -10,38 +10,24 @@ type Route
     = ExpensesRoute
     | ExpenseRoute ExpenseId
     | BudgetsRoute
-      -- | BudgetRoute BudgetId
     | NotFoundRoute
 
 
 matchers : Parser (Route -> a) a
 matchers =
     oneOf
-        [ format ExpenseRoute (s "expenses" </> int)
-        , format ExpensesRoute (s "expenses")
-        , -- format BudgetRoute (s "budgets" </> int),
-          format BudgetsRoute (s "budgets")
-        , format ExpensesRoute (s "")
+        [ map ExpensesRoute top
+        , map ExpenseRoute (s "expenses" </> int)
+        , map ExpensesRoute (s "expenses")
+        , map BudgetsRoute (s "budgets")
         ]
 
 
-hashParser : Navigation.Location -> Result String Route
-hashParser location =
-    location.hash
-        |> String.dropLeft 1
-        |> parse identity matchers
-
-
-parser : Navigation.Parser (Result String Route)
-parser =
-    Navigation.makeParser hashParser
-
-
-routeFromResult : Result String Route -> Route
-routeFromResult result =
-    case result of
-        Ok route ->
+parseLocation : Location -> Route
+parseLocation location =
+    case (parseHash matchers location) of
+        Just route ->
             route
 
-        Err string ->
+        Nothing ->
             NotFoundRoute

@@ -1,6 +1,6 @@
-module App.State exposing (initialState, init, update, urlUpdate)
+module App.State exposing (initialState, init, update)
 
-import Navigation
+import Navigation exposing (Location)
 import Types exposing (..)
 import App.Types exposing (..)
 import App.Rest exposing (checkUser)
@@ -11,18 +11,17 @@ import Expenses.List.State
 import Expenses.Edit.State
 import BudgetEditor.State
 import Expenses.List.Types exposing (Expense, ExpenseId)
-import Routes exposing (..)
+import Routes exposing (parseLocation, Route(..))
 import Ports exposing (logout)
-import Utils.Parsers exposing (resultToObject)
 
 
-init : Maybe HoboAuth -> Result String Route -> ( Model, Cmd Msg )
-init auth result =
+init : Maybe HoboAuth -> Location -> ( Model, Cmd Msg )
+init auth location =
     let
-        currentRoute =
-            Routes.routeFromResult result
+        route =
+            Routes.parseLocation location
     in
-        initialState auth currentRoute
+        initialState auth route
 
 
 initialState : Maybe HoboAuth -> Route -> ( Model, Cmd Msg )
@@ -96,21 +95,16 @@ loadBudgetsCommand user =
 -- UPDATE
 
 
-urlUpdate : Result String Route -> Model -> ( Model, Cmd Msg )
-urlUpdate result model =
-    let
-        route =
-            Routes.routeFromResult result
-
-        newModel =
-            { model | route = route }
-    in
-        ( newModel, routeLoadCommands newModel )
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        OnLocationChange location ->
+            let
+                newRoute =
+                    parseLocation location
+            in
+                ( { model | route = newRoute }, Cmd.none )
+
         List listMsg ->
             let
                 ( listData, fx ) =
@@ -150,26 +144,26 @@ update msg model =
             in
                 ( { model | data = data }, allFx )
 
-        UserCheckOk result ->
+        UserCheckOk checkData ->
             let
-                params =
-                    Maybe.withDefault ( 0.0, "" ) (resultToObject result)
-
                 oldUser =
                     model.user
 
+                ( weekFraction, currency ) =
+                    checkData
+
                 newUser =
-                    { oldUser | authenticated = True, weekFraction = fst params, currency = snd params }
+                    { oldUser | authenticated = True, weekFraction = weekFraction, currency = currency }
 
                 newModel =
                     { model | user = newUser }
             in
                 ( newModel, afterUserCheckCommands newModel )
 
-        UserCheckFail result ->
+        UserCheckFail error ->
             let
                 _ =
-                    Debug.log "Login failed!" result
+                    Debug.log "Login failed!" error
             in
                 ( model, Cmd.none )
 

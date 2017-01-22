@@ -2,17 +2,17 @@ module Main exposing (..)
 
 import Navigation
 import Types exposing (..)
-import App.State exposing (initialState, init, update, urlUpdate)
+import App.State exposing (initialState, init, update)
 import App.View as App
+import App.Types exposing (Model, Msg(..))
 import Routes exposing (Route)
 
 
-main : Program (Maybe HoboAuth)
+main : Program (Maybe HoboAuth) Model Msg
 main =
-    Navigation.programWithFlags Routes.parser
+    Navigation.programWithFlags OnLocationChange
         { init = init
-        , view = App.root
         , update = update
-        , urlUpdate = urlUpdate
+        , view = App.root
         , subscriptions = \_ -> Sub.none
         }

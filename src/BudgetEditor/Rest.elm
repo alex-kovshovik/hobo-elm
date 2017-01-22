@@ -1,12 +1,13 @@
 module BudgetEditor.Rest exposing (saveBudgets, deleteBudget)
 
+import Http
 import HttpBuilder exposing (..)
 import Json.Encode
 import Task
 import Urls exposing (withAuthHeader)
 import Types exposing (..)
 import Budgets.Types exposing (Budget, BudgetId)
-import Budgets.Rest exposing (decodeBudgets)
+import Budgets.Rest exposing (budgetsDecoder)
 import BudgetEditor.Types exposing (..)
 import Urls exposing (budgetsUrl, deleteBudgetUrl)
 
@@ -17,9 +18,18 @@ saveBudgets user budgets =
         |> withHeader "Content-Type" "application/json"
         |> withAuthHeader user
         |> withJsonBody (encodeBudgets budgets)
-        |> send (jsonReader decodeBudgets) (jsonReader decodeBudgets)
-        |> Task.toResult
-        |> Task.perform SaveOk SaveOk
+        |> withExpect (Http.expectJson budgetsDecoder)
+        |> send handleSaveBudgets
+
+
+handleSaveBudgets : Result Http.Error (List Budget) -> Msg
+handleSaveBudgets result =
+    case result of
+        Ok budgets ->
+            SaveOk budgets
+
+        Err error ->
+            SaveFail error
 
 
 deleteBudget : User -> BudgetId -> Cmd Msg
@@ -27,9 +37,18 @@ deleteBudget user budgetId =
     delete (deleteBudgetUrl user budgetId)
         |> withHeader "Content-Type" "application/json"
         |> withAuthHeader user
-        |> send stringReader stringReader
-        |> Task.toResult
-        |> Task.perform DeleteOk DeleteOk
+        |> withExpect Http.expectString
+        |> send handleDeleteBudget
+
+
+handleDeleteBudget : Result Http.Error String -> Msg
+handleDeleteBudget result =
+    case result of
+        Ok response ->
+            DeleteOk response
+
+        Err error ->
+            DeleteFail error
 
 
 

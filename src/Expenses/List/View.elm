@@ -1,7 +1,10 @@
 module Expenses.List.View exposing (root)
 
 import Html exposing (..)
-import Html.App exposing (map)
+
+
+-- import Html.App exposing (map)
+
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Date
@@ -86,7 +89,7 @@ viewExpenseForm model =
                 [ span [] [ text (formatAmount ((model.amount |> toFloatPoh) / 100.0)) ]
                 , input
                     [ id "amount-input"
-                    , type' "number"
+                    , type_ "number"
                     , step "1"
                     , name "amount"
                     , value model.amount
@@ -103,7 +106,7 @@ viewExpenseForm model =
 
 viewBudgets : User -> List Expense -> Model -> Html Msg
 viewBudgets user expenses model =
-    map BudgetList (Budgets.root user model.weekNumber expenses model.buttons)
+    Html.map BudgetList (Budgets.root user model.weekNumber expenses model.buttons)
 
 
 weekHeader : Model -> String -> Html Msg

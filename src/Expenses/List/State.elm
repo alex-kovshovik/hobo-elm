@@ -1,5 +1,6 @@
 module Expenses.List.State exposing (initialState, update)
 
+import Debug
 import Navigation
 import String
 import Types exposing (..)
@@ -7,7 +8,6 @@ import Expenses.List.Types exposing (..)
 import Expenses.List.Rest exposing (..)
 import Budgets.State as Budgets
 import Utils.Numbers exposing (toFloatPoh)
-import Utils.Parsers exposing (resultToObject)
 
 
 initialState : Model
@@ -55,18 +55,10 @@ update user msg model =
             in
                 ( { model | amount = newAmount, buttons = buttonData }, cmd )
 
-        UpdateAdded expenseResult ->
+        UpdateAddedOk expense ->
             let
-                newExpense =
-                    resultToObject expenseResult
-
                 newExpenses =
-                    case newExpense of
-                        Just expense ->
-                            expense :: model.expenses
-
-                        Nothing ->
-                            model.expenses
+                    expense :: model.expenses
 
                 buttons =
                     model.buttons
@@ -76,28 +68,30 @@ update user msg model =
             in
                 ( { model | buttons = newButtons, expenses = newExpenses }, Cmd.none )
 
+        UpdateAddedFail error ->
+            let
+                _ =
+                    Debug.log "Expense List: UpdateAddedFail" error
+            in
+                ( model, Cmd.none )
+
         -- showing/editing expenses
         Show expense ->
             ( model, Navigation.modifyUrl ("#expenses/" ++ (toString expense.id)) )
 
         -- loading and displaying the list
-        RequestList ->
+        LoadList ->
             ( model, getExpenses user model.weekNumber )
 
-        UpdateList expensesResult ->
+        LoadListOk expenses ->
+            ( { model | expenses = expenses }, Cmd.none )
+
+        LoadListFail error ->
             let
-                expensesObject =
-                    resultToObject expensesResult
-
-                expenses =
-                    case expensesObject of
-                        Just list ->
-                            list
-
-                        Nothing ->
-                            []
+                _ =
+                    Debug.log "Expense List: LoadListFail" error
             in
-                ( { model | expenses = expenses }, Cmd.none )
+                ( model, Cmd.none )
 
         -- navigating between weeks
         LoadPreviousWeek ->

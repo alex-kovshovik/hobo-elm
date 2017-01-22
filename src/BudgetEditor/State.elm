@@ -2,7 +2,6 @@ module BudgetEditor.State exposing (update)
 
 import Navigation
 import Utils.Numbers exposing (toFloatPoh)
-import Utils.Parsers exposing (resultToObject)
 import Types exposing (..)
 import Budgets.Types exposing (Model, Budget)
 import BudgetEditor.Types exposing (..)
@@ -60,20 +59,15 @@ update user msg model =
         Save ->
             ( model, saveBudgets user model.budgets, False )
 
-        SaveOk result ->
+        SaveOk budgets ->
+            ( { model | budgets = budgets }, Navigation.modifyUrl "#expenses", False )
+
+        SaveFail error ->
             let
-                maybeBudgets =
-                    resultToObject result
-
-                budgets =
-                    case maybeBudgets of
-                        Just b ->
-                            b
-
-                        Nothing ->
-                            model.budgets
+                _ =
+                    Debug.log "BudgetEditor: SaveFail" error
             in
-                ( { model | budgets = budgets }, Navigation.modifyUrl "#expenses", False )
+                ( model, Cmd.none, False )
 
         Delete budgetId ->
             let
@@ -90,6 +84,13 @@ update user msg model =
 
         DeleteOk result ->
             ( model, Cmd.none, False )
+
+        DeleteFail error ->
+            let
+                _ =
+                    Debug.log "BudgetEditor: DeleteFail" error
+            in
+                ( model, Cmd.none, False )
 
         Cancel ->
             ( model, Navigation.modifyUrl "#expenses", True )

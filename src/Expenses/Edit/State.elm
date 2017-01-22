@@ -4,7 +4,6 @@ import Navigation
 import Time
 import Date
 import Platform.Cmd exposing (map)
-import Utils.Parsers exposing (resultToObject)
 import Types exposing (..)
 import Expenses.List.Types as Expenses
 import Expenses.Edit.Types exposing (..)
@@ -28,21 +27,18 @@ initialState =
 update : User -> Msg -> Model -> ( Model, Cmd Msg )
 update user msg model =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
-
         CommentInput comment ->
             ( { model | comment = comment }, Cmd.none )
 
-        LoadOk result ->
-            let
-                expense =
-                    resultToObject result |> Maybe.withDefault (emptyExpense)
-            in
-                ( { model | expense = expense, comment = expense.comment }, Cmd.none )
+        LoadOk expense ->
+            ( { model | expense = expense, comment = expense.comment }, Cmd.none )
 
-        LoadFail result ->
-            ( { model | error = "Error loading the expense" }, Cmd.none )
+        LoadFail error ->
+            let
+                _ =
+                    Debug.log "Expenses Edit: LoadFail" error
+            in
+                ( { model | error = "Error loading the expense" }, Cmd.none )
 
         Update ->
             let
@@ -65,6 +61,13 @@ update user msg model =
 
         DeleteOk result ->
             ( model, Navigation.modifyUrl "#expenses" )
+
+        DeleteFail error ->
+            let
+                _ =
+                    Debug.log "Expenses Edit: LoadFail" error
+            in
+                ( { model | error = "Error deleting the expense" }, Cmd.none )
 
         Cancel ->
             ( model, Navigation.modifyUrl "#expenses" )

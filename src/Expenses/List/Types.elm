@@ -1,8 +1,8 @@
 module Expenses.List.Types exposing (..)
 
 import Date exposing (Date)
-import HttpBuilder exposing (Error, Response)
 import Types exposing (..)
+import Http
 import Budgets.Types as Budgets
 
 
@@ -39,12 +39,14 @@ type Msg
     = AmountInput String
     | BudgetList Budgets.Msg
       -- adding/removing expenses
-    | UpdateAdded (Result (Error Expense) (Response Expense))
+    | UpdateAddedOk Expense
+    | UpdateAddedFail Http.Error
       -- showing/editing expenses
     | Show Expense
       -- loading and displaying the list
-    | RequestList
-    | UpdateList (Result (Error ExpenseList) (Response ExpenseList))
+    | LoadList
+    | LoadListOk ExpenseList
+    | LoadListFail Http.Error
       -- navigating between weeks
     | LoadPreviousWeek
     | LoadNextWeek

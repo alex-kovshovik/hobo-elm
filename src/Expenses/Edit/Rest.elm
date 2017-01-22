@@ -1,8 +1,9 @@
 module Expenses.Edit.Rest exposing (loadExpense, updateExpense, deleteExpense)
 
+import Http
 import HttpBuilder exposing (..)
 import Task
-import Json.Decode as Json exposing ((:=))
+import Json.Decode as Json exposing (field)
 import Json.Encode
 import Date
 import Urls exposing (..)
@@ -17,9 +18,18 @@ loadExpense user expenseId =
     get (expenseUrl user expenseId)
         |> withHeader "Content-Type" "application/json"
         |> withAuthHeader user
-        |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
-        |> Task.toResult
-        |> Task.perform LoadFail LoadOk
+        |> withExpect (Http.expectJson decodeExpense)
+        |> send handleLoadExpense
+
+
+handleLoadExpense : Result Http.Error Expense -> Msg
+handleLoadExpense result =
+    case result of
+        Ok expense ->
+            LoadOk expense
+
+        Err error ->
+            LoadFail error
 
 
 updateExpense : User -> Expense -> Cmd Msg
@@ -39,9 +49,18 @@ updateExpense user expense =
             |> withHeader "Content-Type" "application/json"
             |> withAuthHeader user
             |> withJsonBody expenseJson
-            |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
-            |> Task.toResult
-            |> Task.perform UpdateFail UpdateOk
+            |> withExpect (Http.expectJson decodeExpense)
+            |> send handleUpdateExpense
+
+
+handleUpdateExpense : Result Http.Error Expense -> Msg
+handleUpdateExpense result =
+    case result of
+        Ok expense ->
+            UpdateOk expense
+
+        Err error ->
+            UpdateFail error
 
 
 deleteExpense : User -> ExpenseId -> Cmd Msg
@@ -49,9 +68,18 @@ deleteExpense user expenseId =
     delete (deleteExpenseUrl user expenseId)
         |> withHeader "Content-Type" "application/json"
         |> withAuthHeader user
-        |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
-        |> Task.toResult
-        |> Task.perform DeleteOk DeleteOk
+        |> withExpect (Http.expectJson decodeExpense)
+        |> send handleDeleteExpense
+
+
+handleDeleteExpense : Result Http.Error Expense -> Msg
+handleDeleteExpense result =
+    case result of
+        Ok expense ->
+            DeleteOk expense
+
+        Err error ->
+            DeleteFail error
 
 
 
@@ -65,14 +93,14 @@ decodeExpense =
 
 decodeExpenseFields : Json.Decoder Expense
 decodeExpenseFields =
-    Json.object7 convertDecoding
-        ("id" := Json.int)
-        ("budget_id" := Json.int)
-        ("budget_name" := Json.string)
-        ("created_by_name" := Json.string)
-        ("amount" := Json.string)
-        ("comment" := Json.oneOf [ Json.null "", Json.string ])
-        ("created_at" := Json.string)
+    Json.map7 convertDecoding
+        (field "id" Json.int)
+        (field "budget_id" Json.int)
+        (field "budget_name" Json.string)
+        (field "created_by_name" Json.string)
+        (field "amount" Json.string)
+        (field "comment" (Json.oneOf [ Json.null "", Json.string ]))
+        (field "created_at" Json.string)
 
 
 convertDecoding : RecordId -> RecordId -> String -> String -> String -> String -> String -> Expense

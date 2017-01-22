@@ -3,7 +3,10 @@ module App.View exposing (root)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Html.App as Html exposing (map)
+
+
+-- import Html.App as Html exposing (map)
+
 import App.Types exposing (..)
 import Expenses.Edit.View
 import Expenses.List.View
@@ -37,13 +40,13 @@ pages : Model -> Html Msg
 pages model =
     case model.route of
         ExpensesRoute ->
-            map List (Expenses.List.View.root model.user model.data)
+            Html.map List (Expenses.List.View.root model.user model.data)
 
         ExpenseRoute expenseId ->
-            map Edit (Expenses.Edit.View.root model.user model.editData)
+            Html.map Edit (Expenses.Edit.View.root model.user model.editData)
 
         BudgetsRoute ->
-            map BudgetEditor (BudgetEditor.View.root model.user model.data.buttons)
+            Html.map BudgetEditor (BudgetEditor.View.root model.user model.data.buttons)
 
         -- BudgetRoute budgetId ->
         --   text "One budget route"

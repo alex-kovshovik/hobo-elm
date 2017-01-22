@@ -1,6 +1,5 @@
 module Budgets.State exposing (..)
 
-import Utils.Parsers exposing (resultToObject)
 import Types exposing (..)
 import Budgets.Types exposing (..)
 import Budgets.Rest exposing (..)
@@ -27,20 +26,15 @@ update user msg model =
             in
                 ( { model | currentBudgetId = budgetId }, Cmd.none, ( addNew, id ) )
 
-        Request ->
+        LoadList ->
             ( model, getBudgets user, ( False, 0 ) )
 
-        DisplayLoaded budgetsResult ->
+        LoadListOk budgets ->
+            ( { model | budgets = budgets }, Cmd.none, ( False, 0 ) )
+
+        LoadListFail error ->
             let
-                budgetsObject =
-                    resultToObject budgetsResult
-
-                budgets =
-                    case budgetsObject of
-                        Just list ->
-                            list
-
-                        Nothing ->
-                            []
+                _ =
+                    Debug.log "Budgets: LoadListFail" error
             in
-                ( { model | budgets = budgets }, Cmd.none, ( False, 0 ) )
+                ( model, Cmd.none, ( False, 0 ) )

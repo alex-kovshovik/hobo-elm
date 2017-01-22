@@ -54,7 +54,7 @@ oneBudget budget =
         , td []
             [ div [ class "field-group" ]
                 [ input
-                    [ type' "text"
+                    [ type_ "text"
                     , onInput (InputName budget.id)
                     , class "field"
                     , value budget.name
@@ -65,7 +65,7 @@ oneBudget budget =
         , td []
             [ div [ class "field-group" ]
                 [ input
-                    [ type' "number"
+                    [ type_ "number"
                     , onInput (InputAmount budget.id)
                     , class "field"
                     , value (budget.amount |> toString)

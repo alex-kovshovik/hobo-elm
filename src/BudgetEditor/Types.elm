@@ -1,6 +1,6 @@
 module BudgetEditor.Types exposing (..)
 
-import HttpBuilder exposing (Error, Response)
+import Http
 import Budgets.Types exposing (Budget)
 
 
@@ -10,7 +10,9 @@ type Msg
     | InputName Int String
     | InputAmount Int String
     | Save
-    | SaveOk (Result (Error (List Budget)) (Response (List Budget)))
+    | SaveOk (List Budget)
+    | SaveFail Http.Error
     | Delete Int
-    | DeleteOk (Result (Error String) (Response String))
+    | DeleteOk String
+    | DeleteFail Http.Error
     | Cancel

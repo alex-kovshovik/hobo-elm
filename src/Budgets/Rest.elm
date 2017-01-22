@@ -1,8 +1,9 @@
-module Budgets.Rest exposing (getBudgets, decodeBudgets)
+module Budgets.Rest exposing (getBudgets, budgetsDecoder)
 
 import Task
+import Http
+import Json.Decode as Json exposing (field)
 import HttpBuilder exposing (..)
-import Json.Decode as Json exposing ((:=))
 import Utils.Numbers exposing (toFloatPoh)
 import Types exposing (..)
 import Budgets.Types exposing (..)
@@ -14,22 +15,31 @@ getBudgets user =
     get (budgetsUrl user)
         |> withHeader "Content-Type" "application/json"
         |> withAuthHeader user
-        |> send (jsonReader decodeBudgets) (jsonReader decodeBudgets)
-        |> Task.toResult
-        |> Task.perform DisplayLoaded DisplayLoaded
+        |> withExpect (Http.expectJson budgetsDecoder)
+        |> send handleGetBudgets
 
 
-decodeBudgets : Json.Decoder (List Budget)
-decodeBudgets =
-    Json.at [ "budgets" ] (Json.list decodeBudget)
+handleGetBudgets : Result Http.Error (List Budget) -> Msg
+handleGetBudgets result =
+    case result of
+        Ok budgets ->
+            LoadListOk budgets
+
+        Err error ->
+            LoadListFail error
 
 
-decodeBudget : Json.Decoder Budget
-decodeBudget =
-    Json.object3 convertDecoding
-        ("id" := Json.int)
-        ("name" := Json.string)
-        ("amount" := Json.string)
+budgetsDecoder : Json.Decoder (List Budget)
+budgetsDecoder =
+    Json.at [ "budgets" ] (Json.list budgetDecoder)
+
+
+budgetDecoder : Json.Decoder Budget
+budgetDecoder =
+    Json.map3 convertDecoding
+        (field "id" Json.int)
+        (field "name" Json.string)
+        (field "amount" Json.string)
 
 
 convertDecoding : RecordId -> String -> String -> Budget

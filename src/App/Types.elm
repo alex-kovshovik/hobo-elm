@@ -1,6 +1,8 @@
 module App.Types exposing (..)
 
+import Http
 import HttpBuilder exposing (..)
+import Navigation exposing (Location)
 import Routes exposing (Route)
 import Types exposing (..)
 import Expenses.List.Types as Expenses
@@ -21,10 +23,11 @@ type alias Model =
 
 
 type Msg
-    = List Expenses.Msg
+    = OnLocationChange Location
+    | List Expenses.Msg
     | Edit Expense.Msg
     | BudgetEditor BudgetEditor.Types.Msg
-    | UserCheckOk (Result (Error CheckData) (Response CheckData))
-    | UserCheckFail (Result (Error CheckData) (Response CheckData))
+    | UserCheckOk CheckData
+    | UserCheckFail Http.Error
     | EditBudgets
     | Logout

@@ -2,7 +2,7 @@ module App.Rest exposing (checkUser)
 
 import Http
 import HttpBuilder exposing (..)
-import Json.Decode as Json exposing ((:=))
+import Json.Decode as Json exposing (field)
 import Json.Encode
 import Task
 import Types exposing (..)
@@ -21,14 +21,23 @@ checkUser user =
         post (authCheckUrl user)
             |> withHeader "Content-Type" "application/json"
             |> withJsonBody userJson
-            |> send (jsonReader decodeUser) (jsonReader decodeUser)
-            |> Task.toResult
-            |> Task.perform UserCheckFail UserCheckOk
+            |> withExpect (Http.expectJson decodeUser)
+            |> send handleCheckUser
+
+
+handleCheckUser : Result Http.Error CheckData -> Msg
+handleCheckUser result =
+    case result of
+        Ok checkData ->
+            UserCheckOk checkData
+
+        Err error ->
+            UserCheckFail error
 
 
 authCheckUrl : User -> String
 authCheckUrl user =
-    Http.url (user.apiBaseUrl ++ "auth/check") []
+    user.apiBaseUrl ++ "auth/check"
 
 
 decodeUser : Json.Decoder CheckData
@@ -38,6 +47,6 @@ decodeUser =
 
 decodeUserFields : Json.Decoder CheckData
 decodeUserFields =
-    Json.object2 (,)
-        ("week_fraction" := Json.float)
-        ("currency" := Json.string)
+    Json.map2 (,)
+        (field "week_fraction" Json.float)
+        (field "currency" Json.string)

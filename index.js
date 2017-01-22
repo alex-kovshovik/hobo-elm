@@ -1,7 +1,6 @@
 // pull in desired CSS/SASS files
 require('./styles/styles.css')
 require('./styles/hobo.scss')
-require('font-awesome-webpack')
 
 const Elm = require('./src/Main')
 

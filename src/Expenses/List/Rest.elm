@@ -3,7 +3,7 @@ module Expenses.List.Rest exposing (getExpenses, getNewExpenseCmd)
 import Http
 import HttpBuilder exposing (..)
 import Task
-import Json.Decode as Json exposing ((:=))
+import Json.Decode as Json exposing (field)
 import Json.Encode
 import Date
 import Urls exposing (..)
@@ -15,15 +15,25 @@ import Utils.Numbers exposing (toFloatPoh, formatAmount)
 
 getExpenses : User -> Int -> Cmd Msg
 getExpenses user weekNumber =
-    get (expensesUrl user weekNumber)
+    get (expensesUrl user)
         |> withHeader "Content-Type" "application/json"
+        |> withQueryParams [ ( "week", toString weekNumber ) ]
         |> withAuthHeader user
-        |> send (jsonReader decodeExpenses) (jsonReader decodeExpenses)
-        |> Task.toResult
-        |> Task.perform UpdateList UpdateList
+        |> withExpect (Http.expectJson decodeExpenses)
+        |> send handleGetExpenses
 
 
-getNewExpenseCmd : User -> Float -> BudgetId -> Cmd Expenses.List.Types.Msg
+handleGetExpenses : Result Http.Error ExpenseList -> Msg
+handleGetExpenses result =
+    case result of
+        Ok expenses ->
+            LoadListOk expenses
+
+        Err error ->
+            LoadListFail error
+
+
+getNewExpenseCmd : User -> Float -> BudgetId -> Cmd Msg
 getNewExpenseCmd user amount budgetId =
     let
         newExpense =
@@ -55,18 +65,23 @@ addExpense user expense =
             |> withHeader "Content-Type" "application/json"
             |> withAuthHeader user
             |> withJsonBody expenseJson
-            |> send (jsonReader decodeExpense) (jsonReader decodeExpense)
-            |> Task.toResult
-            |> Task.perform UpdateAdded UpdateAdded
+            |> withExpect (Http.expectJson decodeExpense)
+            |> send handleAddExpense
 
 
-expensesUrl : User -> Int -> String
-expensesUrl user weekNumber =
-    let
-        params =
-            [ ( "week", toString weekNumber ) ]
-    in
-        Http.url (user.apiBaseUrl ++ "expenses") params
+handleAddExpense : Result Http.Error Expense -> Msg
+handleAddExpense result =
+    case result of
+        Ok expense ->
+            UpdateAddedOk expense
+
+        Err error ->
+            UpdateAddedFail error
+
+
+expensesUrl : User -> String
+expensesUrl user =
+    user.apiBaseUrl ++ "expenses"
 
 
 
@@ -85,14 +100,14 @@ decodeExpense =
 
 decodeExpenseFields : Json.Decoder Expense
 decodeExpenseFields =
-    Json.object7 convertDecoding
-        ("id" := Json.int)
-        ("budget_id" := Json.int)
-        ("budget_name" := Json.string)
-        ("created_by_name" := Json.string)
-        ("amount" := Json.string)
-        ("comment" := Json.oneOf [ Json.null "", Json.string ])
-        ("created_at" := Json.string)
+    Json.map7 convertDecoding
+        (field "id" Json.int)
+        (field "budget_id" Json.int)
+        (field "budget_name" Json.string)
+        (field "created_by_name" Json.string)
+        (field "amount" Json.string)
+        (field "comment" (Json.oneOf [ Json.null "", Json.string ]))
+        (field "created_at" Json.string)
 
 
 convertDecoding : RecordId -> RecordId -> String -> String -> String -> String -> String -> Expense

@@ -1,6 +1,6 @@
 module Budgets.Types exposing (..)
 
-import HttpBuilder exposing (Error, Response)
+import Http
 import Types exposing (..)
 
 
@@ -22,14 +22,12 @@ type alias BudgetList =
 type alias Model =
     { budgets : List Budget
     , currentBudgetId : Maybe RecordId
-    , -- one or none can be selected.
-      nextBudgetId :
-        BudgetId
-        -- Only used for budget editing, negative numbers.
+    , nextBudgetId : BudgetId
     }
 
 
 type Msg
     = Toggle BudgetId
-    | Request
-    | DisplayLoaded (Result (Error BudgetList) (Response BudgetList))
+    | LoadList
+    | LoadListOk BudgetList
+    | LoadListFail Http.Error
