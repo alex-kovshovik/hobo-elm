@@ -102,8 +102,11 @@ update msg model =
             let
                 newRoute =
                     parseLocation location
+
+                newModel =
+                    { model | route = newRoute }
             in
-                ( { model | route = newRoute }, Cmd.none )
+                ( newModel, routeLoadCommands newModel )
 
         List listMsg ->
             let
