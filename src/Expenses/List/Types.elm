@@ -28,8 +28,8 @@ type alias ExpenseList =
 type alias Model =
     { buttons : Budgets.Model
     , expenses : ExpenseList
-    , weekNumber : Int
-    , -- relative number of week, 0 (zero) means current
+    , monthNumber : Int
+    , -- relative number of month, 0 (zero) means current
       -- form
       amount : String
     }
@@ -47,6 +47,6 @@ type Msg
     | LoadList
     | LoadListOk ExpenseList
     | LoadListFail Http.Error
-      -- navigating between weeks
-    | LoadPreviousWeek
-    | LoadNextWeek
+      -- navigating between months
+    | LoadPreviousMonth
+    | LoadNextMonth

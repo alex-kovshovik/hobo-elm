@@ -1,18 +1,18 @@
-module App.State exposing (initialState, init, update)
+module App.State exposing (init, initialState, update)
 
-import Navigation exposing (Location)
-import Types exposing (..)
-import App.Types exposing (..)
 import App.Rest exposing (checkUser)
-import Expenses.Edit.Rest exposing (loadExpense)
-import Expenses.List.Rest exposing (getExpenses)
-import Budgets.Rest exposing (getBudgets)
-import Expenses.List.State
-import Expenses.Edit.State
+import App.Types exposing (..)
 import BudgetEditor.State
+import Budgets.Rest exposing (getBudgets)
+import Expenses.Edit.Rest exposing (loadExpense)
+import Expenses.Edit.State
+import Expenses.List.Rest exposing (getExpenses)
+import Expenses.List.State
 import Expenses.List.Types exposing (Expense, ExpenseId)
-import Routes exposing (parseLocation, Route(..))
+import Navigation exposing (Location)
 import Ports exposing (logout)
+import Routes exposing (Route(..), parseLocation)
+import Types exposing (..)
 
 
 init : Maybe HoboAuth -> Location -> ( Model, Cmd Msg )
@@ -21,7 +21,7 @@ init auth location =
         route =
             Routes.parseLocation location
     in
-        initialState auth route
+    initialState auth route
 
 
 initialState : Maybe HoboAuth -> Route -> ( Model, Cmd Msg )
@@ -36,20 +36,20 @@ initialState auth route =
         defaultUser =
             User "" "" False "" 0.5 "USD"
     in
-        case auth of
-            Just auth ->
-                let
-                    user =
-                        { defaultUser
-                            | apiBaseUrl = auth.apiBaseUrl
-                            , email = auth.email
-                            , token = auth.token
-                        }
-                in
-                    ( Model data editData user route, checkUser user )
+    case auth of
+        Just auth ->
+            let
+                user =
+                    { defaultUser
+                        | apiBaseUrl = auth.apiBaseUrl
+                        , email = auth.email
+                        , token = auth.token
+                    }
+            in
+            ( Model data editData user route, checkUser user )
 
-            Nothing ->
-                ( Model data editData defaultUser route, Cmd.none )
+        Nothing ->
+            ( Model data editData defaultUser route, Cmd.none )
 
 
 routeLoadCommands : Model -> Cmd Msg
@@ -106,21 +106,21 @@ update msg model =
                 newModel =
                     { model | route = newRoute }
             in
-                ( newModel, routeLoadCommands newModel )
+            ( newModel, routeLoadCommands newModel )
 
         List listMsg ->
             let
                 ( listData, fx ) =
                     Expenses.List.State.update model.user listMsg model.data
             in
-                ( { model | data = listData }, Cmd.map List fx )
+            ( { model | data = listData }, Cmd.map List fx )
 
         Edit expenseMsg ->
             let
                 ( editData, fx ) =
                     Expenses.Edit.State.update model.user expenseMsg model.editData
             in
-                ( { model | editData = editData }, Cmd.map Edit fx )
+            ( { model | editData = editData }, Cmd.map Edit fx )
 
         BudgetEditor editorMsg ->
             let
@@ -145,30 +145,30 @@ update msg model =
                         , reloadBudgetsFx
                         ]
             in
-                ( { model | data = data }, allFx )
+            ( { model | data = data }, allFx )
 
         UserCheckOk checkData ->
             let
                 oldUser =
                     model.user
 
-                ( weekFraction, currency ) =
+                ( monthFraction, currency ) =
                     checkData
 
                 newUser =
-                    { oldUser | authenticated = True, weekFraction = weekFraction, currency = currency }
+                    { oldUser | authenticated = True, monthFraction = monthFraction, currency = currency }
 
                 newModel =
                     { model | user = newUser }
             in
-                ( newModel, afterUserCheckCommands newModel )
+            ( newModel, afterUserCheckCommands newModel )
 
         UserCheckFail error ->
             let
                 _ =
                     Debug.log "Login failed!" error
             in
-                ( model, Cmd.none )
+            ( model, Cmd.none )
 
         EditBudgets ->
             ( model, Navigation.modifyUrl "#budgets" )

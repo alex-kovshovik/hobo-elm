@@ -1,12 +1,12 @@
 module App.Rest exposing (checkUser)
 
+import App.Types exposing (..)
 import Http
 import HttpBuilder exposing (..)
 import Json.Decode as Json exposing (field)
 import Json.Encode
 import Task
 import Types exposing (..)
-import App.Types exposing (..)
 
 
 checkUser : User -> Cmd Msg
@@ -18,11 +18,11 @@ checkUser user =
                 , ( "token", Json.Encode.string user.token )
                 ]
     in
-        post (authCheckUrl user)
-            |> withHeader "Content-Type" "application/json"
-            |> withJsonBody userJson
-            |> withExpect (Http.expectJson decodeUser)
-            |> send handleCheckUser
+    post (authCheckUrl user)
+        |> withHeader "Content-Type" "application/json"
+        |> withJsonBody userJson
+        |> withExpect (Http.expectJson decodeUser)
+        |> send handleCheckUser
 
 
 handleCheckUser : Result Http.Error CheckData -> Msg
@@ -48,5 +48,5 @@ decodeUser =
 decodeUserFields : Json.Decoder CheckData
 decodeUserFields =
     Json.map2 (,)
-        (field "week_fraction" Json.float)
+        (field "month_fraction" Json.float)
         (field "currency" Json.string)

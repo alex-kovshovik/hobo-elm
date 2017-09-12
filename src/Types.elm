@@ -13,6 +13,6 @@ type alias User = {
   token: String,
   authenticated: Bool,
   apiBaseUrl: String,
-  weekFraction: Float, -- Fraction of week that's passed so far
+  monthFraction: Float, -- Fraction of month that's passed so far
   currency: String
 }

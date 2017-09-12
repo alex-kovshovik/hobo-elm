@@ -21,7 +21,7 @@ class HoboJs {
     // This interval only exists because of you, motherfuckers!
     // Your goddamn mobile safari browser refuses to act on JavaScript's "focus"
     // calls, unless they are caused by touch event.
-    setInterval(function() {
+    setTimeout(function() {
       const $amount = $('#amount')
       const $amountInput = $('#amount-input')
 

@@ -1,17 +1,17 @@
 module Budgets.Button.View exposing (root)
 
+import Budgets.Types exposing (..)
+import Expenses.List.Types exposing (Expense)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import String
 import Types exposing (..)
-import Budgets.Types exposing (..)
-import Expenses.List.Types exposing (Expense)
-import Utils.Numbers exposing (formatAmountRound)
 import Utils.Expenses exposing (getTotal)
+import Utils.Numbers exposing (formatAmountRound)
 
 
 root : User -> Int -> Maybe RecordId -> Attribute a -> Budget -> List Expense -> Html a
-root user weekNumber currentBudgetId clicker budget allExpenses =
+root user monthNumber currentBudgetId clicker budget allExpenses =
     let
         expenses =
             List.filter (\e -> e.budgetId == budget.id) allExpenses
@@ -26,8 +26,8 @@ root user weekNumber currentBudgetId clicker budget allExpenses =
             1.0 - spentFraction
 
         shitlineFraction =
-            if weekNumber == 0 then
-                user.weekFraction
+            if monthNumber == 0 then
+                user.monthFraction
             else
                 1.0
 
@@ -42,18 +42,18 @@ root user weekNumber currentBudgetId clicker budget allExpenses =
 
         -- partial funtion execution
     in
-        div [ buttonClass currentBudgetId budget, clicker ]
-            [ div [ class "bb-title" ] [ text budget.name ]
-            , div [ class "bb-prog-container" ]
-                [ div [ shitOrOk ("bb-prog-text" ++ progTextRight) ]
-                    [ b [] [ text (formatAmountRound totalExpenses) ]
-                    , text (" / " ++ (formatAmountRound budget.amount))
-                    ]
-                , div [ class "bb-prog-shitline", style [ ( "width", (shitlineFraction |> toPercentString) ) ] ] []
-                , div [ shitOrOk "bb-prog-left", style [ ( "width", (spentFraction |> toPercentString) ) ] ] []
-                , div [ shitOrOk "bb-prog-right", style [ ( "width", (remainFraction |> toPercentString) ) ] ] []
+    div [ buttonClass currentBudgetId budget, clicker ]
+        [ div [ class "bb-title" ] [ text budget.name ]
+        , div [ class "bb-prog-container" ]
+            [ div [ shitOrOk ("bb-prog-text" ++ progTextRight) ]
+                [ b [] [ text (formatAmountRound totalExpenses) ]
+                , text (" / " ++ formatAmountRound budget.amount)
                 ]
+            , div [ class "bb-prog-shitline", style [ ( "width", shitlineFraction |> toPercentString ) ] ] []
+            , div [ shitOrOk "bb-prog-left", style [ ( "width", spentFraction |> toPercentString ) ] ] []
+            , div [ shitOrOk "bb-prog-right", style [ ( "width", remainFraction |> toPercentString ) ] ] []
             ]
+        ]
 
 
 buttonClass : Maybe RecordId -> Budget -> Attribute a
@@ -68,7 +68,7 @@ buttonClass currentBudgetId budget =
             else
                 baseClasses
     in
-        class (String.join " " classes)
+    class (String.join " " classes)
 
 
 shitOrOkClass : Float -> String -> Attribute a
@@ -83,7 +83,7 @@ shitOrOkClass spentFraction baseClass =
             else
                 "ok" :: baseClasses
     in
-        class (String.join " " classes)
+    class (String.join " " classes)
 
 
 toPercentString : Float -> String
@@ -97,4 +97,4 @@ toPercentString fraction =
             else
                 fraction
     in
-        (100.0 * cappedFraction |> toString) ++ "%"
+    (100.0 * cappedFraction |> toString) ++ "%"

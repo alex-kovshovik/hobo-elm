@@ -1,23 +1,23 @@
 module Expenses.List.Rest exposing (getExpenses, getNewExpenseCmd)
 
+import Budgets.Types exposing (BudgetId)
+import Date
+import Expenses.List.Types exposing (..)
 import Http
 import HttpBuilder exposing (..)
-import Task
 import Json.Decode as Json exposing (field)
 import Json.Encode
-import Date
-import Urls exposing (..)
+import Task
 import Types exposing (..)
-import Expenses.List.Types exposing (..)
-import Budgets.Types exposing (BudgetId)
-import Utils.Numbers exposing (toFloatPoh, formatAmount)
+import Urls exposing (..)
+import Utils.Numbers exposing (formatAmount, toFloatPoh)
 
 
 getExpenses : User -> Int -> Cmd Msg
-getExpenses user weekNumber =
+getExpenses user monthNumber =
     get (expensesUrl user)
         |> withHeader "Content-Type" "application/json"
-        |> withQueryParams [ ( "week", toString weekNumber ) ]
+        |> withQueryParams [ ( "month", toString monthNumber ) ]
         |> withAuthHeader user
         |> withExpect (Http.expectJson decodeExpenses)
         |> send handleGetExpenses
@@ -46,7 +46,7 @@ getNewExpenseCmd user amount budgetId =
             , createdAt = Date.fromTime 0
             }
     in
-        addExpense user newExpense
+    addExpense user newExpense
 
 
 addExpense : User -> Expense -> Cmd Msg
@@ -61,12 +61,12 @@ addExpense user expense =
                   )
                 ]
     in
-        post (newExpenseUrl user expense.budgetId)
-            |> withHeader "Content-Type" "application/json"
-            |> withAuthHeader user
-            |> withJsonBody expenseJson
-            |> withExpect (Http.expectJson decodeExpense)
-            |> send handleAddExpense
+    post (newExpenseUrl user expense.budgetId)
+        |> withHeader "Content-Type" "application/json"
+        |> withAuthHeader user
+        |> withJsonBody expenseJson
+        |> withExpect (Http.expectJson decodeExpense)
+        |> send handleAddExpense
 
 
 handleAddExpense : Result Http.Error Expense -> Msg
@@ -124,4 +124,4 @@ convertDecoding id budgetId budgetName createdByName amount comment createdAtStr
                 Err error ->
                     Date.fromTime 0
     in
-        Expense id budgetId budgetName createdByName (toFloatPoh amount) comment createdAt
+    Expense id budgetId budgetName createdByName (toFloatPoh amount) comment createdAt

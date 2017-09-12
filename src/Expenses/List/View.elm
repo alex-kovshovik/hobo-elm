@@ -31,7 +31,7 @@ root user model =
         div []
             [ viewExpenseForm model
             , viewBudgets user model.expenses model
-            , weekHeader model expensesTotal
+            , monthHeader model expensesTotal
             , viewExpenseList expenses expensesTotal
             ]
 
@@ -106,34 +106,34 @@ viewExpenseForm model =
 
 viewBudgets : User -> List Expense -> Model -> Html Msg
 viewBudgets user expenses model =
-    Html.map BudgetList (Budgets.root user model.weekNumber expenses model.buttons)
+    Html.map BudgetList (Budgets.root user model.monthNumber expenses model.buttons)
 
 
-weekHeader : Model -> String -> Html Msg
-weekHeader model total =
+monthHeader : Model -> String -> Html Msg
+monthHeader model total =
     let
-        weekName =
-            if model.weekNumber == 0 then
-                "This week"
-            else if model.weekNumber == -1 then
-                "Last week"
+        monthName =
+            if model.monthNumber == 0 then
+                "This month"
+            else if model.monthNumber == -1 then
+                "Last month"
             else
-                (toString -model.weekNumber) ++ " weeks ago"
+                (toString -model.monthNumber) ++ " months ago"
 
         rightDisabledClass =
-            if model.weekNumber == 0 then
+            if model.monthNumber == 0 then
                 " disabled"
             else
                 ""
     in
         div [ class "clear mt2" ]
             [ div [ class "col-3 col-1-hd" ]
-                [ button [ class "button week-button", onClick LoadPreviousWeek ] [ text "<<" ]
+                [ button [ class "button month-button", onClick LoadPreviousMonth ] [ text "<<" ]
                 ]
             , div [ class "col-6 col-10-hd" ]
-                [ div [ class "week-header" ] [ text (weekName ++ " - " ++ total) ]
+                [ div [ class "month-header" ] [ text (monthName ++ " - " ++ total) ]
                 ]
             , div [ class "col-3 col-1-hd" ]
-                [ button [ class ("button week-button" ++ rightDisabledClass), onClick LoadNextWeek ] [ text ">>" ]
+                [ button [ class ("button month-button" ++ rightDisabledClass), onClick LoadNextMonth ] [ text ">>" ]
                 ]
             ]

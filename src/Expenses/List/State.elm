@@ -1,12 +1,12 @@
 module Expenses.List.State exposing (initialState, update)
 
+import Budgets.State as Budgets
 import Debug
+import Expenses.List.Rest exposing (..)
+import Expenses.List.Types exposing (..)
 import Navigation
 import String
 import Types exposing (..)
-import Expenses.List.Types exposing (..)
-import Expenses.List.Rest exposing (..)
-import Budgets.State as Budgets
 import Utils.Numbers exposing (toFloatPoh)
 
 
@@ -14,7 +14,7 @@ initialState : Model
 initialState =
     { buttons = Budgets.initialModel
     , expenses = []
-    , weekNumber = 0
+    , monthNumber = 0
     , amount = ""
     }
 
@@ -30,7 +30,7 @@ update user msg model =
                 newButtons =
                     { buttons | currentBudgetId = Nothing }
             in
-                ( { model | buttons = newButtons, amount = String.split "." amount |> String.join "" }, Cmd.none )
+            ( { model | buttons = newButtons, amount = String.split "." amount |> String.join "" }, Cmd.none )
 
         BudgetList bblAction ->
             let
@@ -38,7 +38,7 @@ update user msg model =
                     Budgets.update user bblAction model.buttons
 
                 floatAmount =
-                    (toFloatPoh model.amount) / 100.0
+                    toFloatPoh model.amount / 100.0
 
                 -- UI now renders hidden input
                 ( newAmount, addExpenseCmd ) =
@@ -53,7 +53,7 @@ update user msg model =
                         , addExpenseCmd
                         ]
             in
-                ( { model | amount = newAmount, buttons = buttonData }, cmd )
+            ( { model | amount = newAmount, buttons = buttonData }, cmd )
 
         UpdateAddedOk expense ->
             let
@@ -66,22 +66,22 @@ update user msg model =
                 newButtons =
                     { buttons | currentBudgetId = Nothing }
             in
-                ( { model | buttons = newButtons, expenses = newExpenses }, Cmd.none )
+            ( { model | buttons = newButtons, expenses = newExpenses }, Cmd.none )
 
         UpdateAddedFail error ->
             let
                 _ =
                     Debug.log "Expense List: UpdateAddedFail" error
             in
-                ( model, Cmd.none )
+            ( model, Cmd.none )
 
         -- showing/editing expenses
         Show expense ->
-            ( model, Navigation.modifyUrl ("#expenses/" ++ (toString expense.id)) )
+            ( model, Navigation.modifyUrl ("#expenses/" ++ toString expense.id) )
 
         -- loading and displaying the list
         LoadList ->
-            ( model, getExpenses user model.weekNumber )
+            ( model, getExpenses user model.monthNumber )
 
         LoadListOk expenses ->
             ( { model | expenses = expenses }, Cmd.none )
@@ -91,22 +91,22 @@ update user msg model =
                 _ =
                     Debug.log "Expense List: LoadListFail" error
             in
-                ( model, Cmd.none )
+            ( model, Cmd.none )
 
-        -- navigating between weeks
-        LoadPreviousWeek ->
+        -- navigating between months
+        LoadPreviousMonth ->
             let
-                weekNumber =
-                    model.weekNumber - 1
+                monthNumber =
+                    model.monthNumber - 1
             in
-                ( { model | weekNumber = weekNumber }, getExpenses user weekNumber )
+            ( { model | monthNumber = monthNumber }, getExpenses user monthNumber )
 
-        LoadNextWeek ->
+        LoadNextMonth ->
             let
-                weekNumber =
-                    if model.weekNumber < 0 then
-                        model.weekNumber + 1
+                monthNumber =
+                    if model.monthNumber < 0 then
+                        model.monthNumber + 1
                     else
-                        model.weekNumber
+                        model.monthNumber
             in
-                ( { model | weekNumber = weekNumber }, getExpenses user weekNumber )
+            ( { model | monthNumber = monthNumber }, getExpenses user monthNumber )
